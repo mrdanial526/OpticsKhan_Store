@@ -33,12 +33,15 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   phone: String,
+  address: String,
+  city: String,
   role: { type: String, default: 'customer' },
   createdAt: { type: String }
-});
+}, { timestamps: true });
 
 const OrderSchema = new mongoose.Schema({
   orderId: { type: String, required: true, unique: true },
+  userId: String,
   customer: Object,
   prescription: Object,
   items: Array,
@@ -48,6 +51,9 @@ const OrderSchema = new mongoose.Schema({
   totalAmount: Number,
   paymentMethod: String,
   status: String,
+  statusHistory: [{ status: String, timestamp: String, note: String }],
+  courierName: String,
+  courierTrackingNumber: String,
   createdAt: { type: String },
   estimatedDelivery: String
 }, { timestamps: true });
@@ -776,8 +782,32 @@ class Database {
 
   createOrder(orderPayload) {
     const orderId = `FO-${Math.floor(100000 + Math.random() * 900000)}`;
+    const nowIso = new Date().toISOString();
+
+    // Link user and auto-save delivery address to their profile
+    let linkedUserId = orderPayload.userId || null;
+    let updatedUserSafe = null;
+
+    if (this.data.users && (orderPayload.userId || orderPayload.email)) {
+      const user = this.data.users.find(u => 
+        (orderPayload.userId && u.id === orderPayload.userId) || 
+        (orderPayload.email && u.email && u.email.toLowerCase() === orderPayload.email.toLowerCase())
+      );
+      if (user) {
+        linkedUserId = user.id;
+        user.address = orderPayload.address;
+        user.city = orderPayload.city;
+        if (orderPayload.phone) user.phone = orderPayload.phone;
+        this.save();
+        this.syncToMongo('user', { email: user.email }, user);
+        const { password: _, ...uSafe } = user;
+        updatedUserSafe = uSafe;
+      }
+    }
+
     const newOrder = {
       orderId,
+      userId: linkedUserId,
       customer: {
         fullName: orderPayload.fullName,
         phone: orderPayload.phone,
@@ -794,14 +824,23 @@ class Database {
       totalAmount: orderPayload.totalAmount || 0,
       paymentMethod: orderPayload.paymentMethod || "Cash on Delivery (COD)",
       status: "Confirmed & Packing",
-      createdAt: new Date().toISOString(),
-      estimatedDelivery: "2 to 3 Business Days"
+      statusHistory: [
+        {
+          status: "Confirmed & Packing",
+          timestamp: nowIso,
+          note: "Order verified and queued for optical preparation"
+        }
+      ],
+      courierName: orderPayload.courierName || "TCS Express",
+      courierTrackingNumber: orderPayload.courierTrackingNumber || "",
+      createdAt: nowIso,
+      estimatedDelivery: "2 to 3 Business Days via TCS"
     };
 
     this.data.orders.unshift(newOrder);
     this.save();
     this.syncToMongo('order', { orderId: newOrder.orderId }, newOrder);
-    return newOrder;
+    return { order: newOrder, updatedUser: updatedUserSafe };
   }
 
   getOrder(orderId) {
@@ -1003,10 +1042,18 @@ class Database {
     return this.data.orders || [];
   }
 
-  updateOrderStatus(orderId, status) {
+  updateOrderStatus(orderId, status, courierData = {}) {
     const order = (this.data.orders || []).find(o => o.orderId === orderId);
     if (!order) return null;
     order.status = status;
+    if (courierData.courierName) order.courierName = courierData.courierName;
+    if (courierData.courierTrackingNumber !== undefined) order.courierTrackingNumber = courierData.courierTrackingNumber;
+    if (!order.statusHistory) order.statusHistory = [];
+    order.statusHistory.push({
+      status,
+      timestamp: new Date().toISOString(),
+      note: courierData.note || `Status updated to ${status}`
+    });
     this.save();
     this.syncToMongo('order', { orderId }, order);
     return order;

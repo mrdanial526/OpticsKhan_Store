@@ -85,11 +85,12 @@ app.post('/api/apply-coupon', (req, res) => {
 
 // 8. Create an order
 app.post('/api/orders', (req, res) => {
-  const { fullName, phone, email, address, city, items, subtotal, discount, deliveryFee, totalAmount, paymentMethod, prescription } = req.body;
+  const { userId, fullName, phone, email, address, city, items, subtotal, discount, deliveryFee, totalAmount, paymentMethod, prescription } = req.body;
   if (!fullName || !phone || !address || !items || !items.length) {
     return res.status(400).json({ success: false, message: "Missing required order information." });
   }
-  const order = db.createOrder({
+  const { order, updatedUser } = db.createOrder({
+    userId,
     fullName,
     phone,
     email,
@@ -112,12 +113,15 @@ app.post('/api/orders', (req, res) => {
     time: "Just now"
   });
 
-  console.log(`📧 [EMAIL CONFIRMATION] Dispatched receipt to ${email || 'customer@faboptic.pk'} for Order #${order.orderId} (Rs. ${totalAmount})`);
+  console.log(`\n🔔 [NEW ORDER ALERT] Order #${order.orderId} placed by ${fullName} (${phone}) - Rs. ${totalAmount}`);
+  console.log(`📦 Shipping to: ${address}, ${city || 'Pakistan'}`);
+  console.log(`📧 Dispatched receipt to ${email || 'customer@faboptic.pk'}`);
 
   res.status(201).json({
     success: true,
     message: "Your optical order has been confirmed!",
-    data: order
+    data: order,
+    updatedUser
   });
 });
 
@@ -225,8 +229,8 @@ app.get('/api/admin/orders', (req, res) => {
 });
 
 app.patch('/api/admin/orders/:orderId', (req, res) => {
-  const { status } = req.body;
-  const order = db.updateOrderStatus(req.params.orderId, status);
+  const { status, courierName, courierTrackingNumber } = req.body;
+  const order = db.updateOrderStatus(req.params.orderId, status, { courierName, courierTrackingNumber });
   if (!order) {
     return res.status(404).json({ success: false, message: "Order not found" });
   }

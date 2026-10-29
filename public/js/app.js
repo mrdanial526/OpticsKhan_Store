@@ -885,6 +885,66 @@ const App = {
           year: 'numeric'
         });
 
+        // Dynamic 5-Step Fulfillment Timeline calculation
+        const currentStatus = (order.status || 'Confirmed & Packing').toLowerCase();
+        let currentStepIndex = 1;
+        if (currentStatus.includes('delivered') || currentStatus.includes('verified')) {
+          currentStepIndex = 5;
+        } else if (currentStatus.includes('dispatched') || currentStatus.includes('courier')) {
+          currentStepIndex = 4;
+        } else if (currentStatus.includes('qc') || currentStatus.includes('inspection')) {
+          currentStepIndex = 3;
+        } else if (currentStatus.includes('lab') || currentStatus.includes('cut') || currentStatus.includes('lens')) {
+          currentStepIndex = 2;
+        } else {
+          currentStepIndex = 1;
+        }
+
+        const steps = [
+          { num: 1, label: '1. Confirmed', icon: '✓' },
+          { num: 2, label: '2. Lab Cut', icon: '🔬' },
+          { num: 3, label: '3. QC Passed', icon: '⚡' },
+          { num: 4, label: '4. Dispatched', icon: '🚚' },
+          { num: 5, label: '5. Delivered', icon: '🎉' }
+        ];
+
+        const timelineHtml = steps.map(s => {
+          let bg = 'var(--color-gray-100, #f3f4f6)';
+          let color = 'var(--color-gray-500, #6b7280)';
+          let border = '1px solid var(--color-gray-300, #d1d5db)';
+          let icon = s.num < currentStepIndex ? '✓' : s.icon;
+
+          if (s.num < currentStepIndex) {
+            bg = '#16a34a';
+            color = '#ffffff';
+            border = '1px solid #15803d';
+            icon = '✓';
+          } else if (s.num === currentStepIndex) {
+            bg = '#2563eb';
+            color = '#ffffff';
+            border = '1px solid #1d4ed8';
+          }
+
+          return `
+            <div style="background:${bg}; color:${color}; border:${border}; padding:6px 2px; border-radius:6px; font-size:10.5px; font-weight:700; text-align:center; transition:all 0.3s ease;">
+              <div style="font-size:12px;">${icon}</div>
+              <div style="margin-top:2px;">${s.label}</div>
+            </div>
+          `;
+        }).join('');
+
+        const courierHtml = order.courierTrackingNumber ? `
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 14px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="font-size:10.5px; text-transform:uppercase; font-weight:800; color:#1d4ed8;">Courier Tracking Active</span>
+              <div style="font-size:13px; font-weight:800; color:#1e3a8a; margin-top:2px;">
+                ${order.courierName || 'TCS Express'}: <span style="font-family:monospace; background:#dbeafe; padding:2px 6px; border-radius:4px;">${order.courierTrackingNumber}</span>
+              </div>
+            </div>
+            <a href="https://www.tcsexpress.com/tracking" target="_blank" style="background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:700;">Track on TCS ↗</a>
+          </div>
+        ` : '';
+
         resultBox.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-gray-200); padding-bottom:10px;">
             <div>
@@ -897,30 +957,21 @@ const App = {
             </span>
           </div>
 
-          <!-- Visual 4-Step Optical Timeline -->
+          <!-- Dynamic 5-Step Optical Timeline -->
           <div>
-            <span style="font-size:11px; font-weight:800; color:var(--color-gray-600); text-transform:uppercase;">Fulfillment Progress</span>
-            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-top:8px; text-align:center;">
-              <div style="background:#16a34a; color:#fff; padding:6px 2px; border-radius:6px; font-size:10.5px; font-weight:700;">
-                ✓ 1. Confirmed
-              </div>
-              <div style="background:#16a34a; color:#fff; padding:6px 2px; border-radius:6px; font-size:10.5px; font-weight:700;">
-                ✓ 2. Lab Cut
-              </div>
-              <div style="background:#0284c7; color:#fff; padding:6px 2px; border-radius:6px; font-size:10.5px; font-weight:700;">
-                ⚡ 3. QC Checked
-              </div>
-              <div style="background:var(--color-gray-200); color:var(--color-gray-600); padding:6px 2px; border-radius:6px; font-size:10.5px; font-weight:700;">
-                4. Courier
-              </div>
+            <span style="font-size:11px; font-weight:800; color:var(--color-gray-600); text-transform:uppercase;">Live Fulfillment Progress</span>
+            <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin-top:8px;">
+              ${timelineHtml}
             </div>
           </div>
+
+          ${courierHtml}
 
           <!-- Customer & Delivery Details -->
           <div style="font-size:12.5px; display:flex; flex-direction:column; gap:4px; border-top:1px dashed var(--color-gray-200); padding-top:10px;">
             <div><strong>Recipient:</strong> ${order.customer.fullName} (${order.customer.phone})</div>
             <div><strong>Delivery Destination:</strong> ${order.customer.address}, ${order.customer.city}</div>
-            <div><strong>Estimated Courier Delivery:</strong> <strong>${order.estimatedDelivery || '2-3 Business Days via TCS'}</strong></div>
+            <div><strong>Estimated Delivery:</strong> <strong>${order.estimatedDelivery || '2-3 Business Days via TCS'}</strong></div>
             <div><strong>Payment Mode:</strong> ${order.paymentMethod} (Rs. ${order.totalAmount.toLocaleString()})</div>
           </div>
 
@@ -1896,7 +1947,10 @@ const App = {
 
       tbody.innerHTML = orders.map(o => `
         <tr>
-          <td><strong style="font-size:13px;">#${o.orderId}</strong></td>
+          <td>
+            <strong style="font-size:13px;">#${o.orderId}</strong>
+            ${o.courierTrackingNumber ? `<div style="font-size:10.5px; color:#2563eb; font-weight:700;">${o.courierName || 'TCS'}: ${o.courierTrackingNumber}</div>` : ''}
+          </td>
           <td>
             <strong>${o.customer.fullName}</strong>
             <div style="font-size:11px; color:#666;">${o.customer.phone}</div>
@@ -1925,14 +1979,25 @@ const App = {
 
   async handleUpdateOrderStatus(orderId, status) {
     try {
+      let courierTrackingNumber = undefined;
+      let courierName = undefined;
+
+      if (status.includes('Dispatched') || status.includes('Courier')) {
+        const inputTrack = prompt(`Enter Courier Tracking Number (e.g. TCS-99881122 or Trax ID) for order #${orderId} (leave empty to skip):`, '');
+        if (inputTrack !== null && inputTrack.trim()) {
+          courierTrackingNumber = inputTrack.trim();
+          courierName = "TCS Express";
+        }
+      }
+
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, courierName, courierTrackingNumber })
       });
       const data = await res.json();
       if (data.success) {
-        Cart.showToast(`Order #${orderId} status set to: ${status}`);
+        Cart.showToast(`Order #${orderId} updated to: ${status}`);
         await this.refreshAdminOrders();
       }
     } catch(e) {

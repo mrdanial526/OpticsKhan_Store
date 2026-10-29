@@ -310,6 +310,7 @@ const Cart = {
       if (form.fullName && u.fullName) form.fullName.value = u.fullName;
       if (form.phone && u.phone) form.phone.value = u.phone;
       if (form.email && u.email) form.email.value = u.email;
+      if (form.address && u.address) form.address.value = u.address;
       if (form.city && u.city) form.city.value = u.city;
 
       const userBar = document.getElementById('checkout-auth-user-bar');
@@ -380,6 +381,7 @@ const Cart = {
     submitBtn.textContent = 'Processing Optical Order...';
 
     const orderData = {
+      userId: window.App?.currentUser?.id || null,
       fullName: form.fullName.value || window.App.currentUser.fullName,
       phone: form.phone.value || window.App.currentUser.phone,
       email: form.email.value || window.App.currentUser.email || 'customer@faboptic.pk',
@@ -403,6 +405,16 @@ const Cart = {
       if (data.success) {
         // Save recent order ID for tracking
         localStorage.setItem('faboptic_last_order_id', data.data.orderId);
+
+        // Update local session with saved address
+        if (data.updatedUser && window.App) {
+          window.App.currentUser = { ...window.App.currentUser, ...data.updatedUser };
+          localStorage.setItem('faboptic_auth_user', JSON.stringify(window.App.currentUser));
+        } else if (window.App && window.App.currentUser) {
+          window.App.currentUser.address = orderData.address;
+          window.App.currentUser.city = orderData.city;
+          localStorage.setItem('faboptic_auth_user', JSON.stringify(window.App.currentUser));
+        }
 
         // Clear cart
         this.items = [];
@@ -438,10 +450,20 @@ const Cart = {
       emailNotice.textContent = order.customer.email || 'customer@faboptic.pk';
     }
 
-    // WhatsApp link for instant tracking confirmation
+    // WhatsApp link with full itemized receipt for instant dispatch confirmation
     const waBtn = document.getElementById('whatsapp-track-btn');
     if (waBtn) {
-      const text = encodeURIComponent(`Hi FabOptic! I placed order #${order.orderId} for Rs. ${order.totalAmount}. Please confirm dispatch to ${order.customer.city}!`);
+      const itemsList = (order.items || []).map(i => `• ${i.name} (x${i.quantity || 1}) - Rs. ${(i.price || 0).toLocaleString()}`).join('\n');
+      const text = encodeURIComponent(
+        `👓 *NEW ORDER CONFIRMATION - FABOPTIC PAKISTAN*\n\n` +
+        `*Order ID:* #${order.orderId}\n` +
+        `*Customer:* ${order.customer.fullName}\n` +
+        `*Contact:* ${order.customer.phone}\n` +
+        `*Shipping Address:* ${order.customer.address}, ${order.customer.city}\n\n` +
+        `*Items Ordered:*\n${itemsList}\n\n` +
+        `*Total Payable:* Rs. ${order.totalAmount.toLocaleString()} (${order.paymentMethod})\n\n` +
+        `Please confirm my optical order dispatch!`
+      );
       waBtn.href = `https://wa.me/923241383370?text=${text}`;
     }
 
