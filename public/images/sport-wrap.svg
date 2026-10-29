@@ -1,0 +1,15 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fireMirror" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#DC2626"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="210" r="180" fill="#fef2f2"/>
+  <g>
+    <path d="M80 160 C140 140 240 150 265 170 C260 230 200 260 140 260 C90 260 70 210 80 160 Z" fill="url(#fireMirror)" stroke="#111827" stroke-width="8"/>
+    <path d="M520 160 C460 140 360 150 335 170 C340 230 400 260 460 260 C510 260 530 210 520 160 Z" fill="url(#fireMirror)" stroke="#111827" stroke-width="8"/>
+    <path d="M260 170 C280 160 320 160 340 170" stroke="#111827" stroke-width="9" stroke-linecap="round"/>
+  </g>
+</svg>

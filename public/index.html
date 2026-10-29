@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FabOptic | Luxury Optical, Prescription Glasses & Sunglasses</title>
+  <meta name="description" content="Pakistan's premier optical store for handcrafted prescription frames, polarized sunglasses, blue-light blocking glasses, and precision lenses with free nationwide delivery."/>
+  <meta name="keywords" content="glasses, prescription frames, optical shop pakistan, polarized sunglasses, blue light glasses, online eyeglasses karachi lahore islamabad, aviator glasses, designer frames"/>
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="FabOptic | Luxury Eyewear & Precision Lenses"/>
+  <meta property="og:description" content="Discover premium optical frames with blue-light protection and custom prescription lenses. Free Delivery All Over Pakistan."/>
+  <meta property="og:type" content="website"/>
+  
+  <link rel="icon" href="/images/logo.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/css/style.css?v=2.7"/>
+</head>
+<body>
+
+  <!-- Top Announcement Bar (Rotating Optical Messages inspired by OptixOne & FabDecor) -->
+  <div class="top-bar">
+    <div class="top-bar-content">
+      <div style="display:flex; align-items:center; gap:8px;" id="announcement-message-box">
+        <span class="animate-pk-flag-wave" style="display:inline-flex;">
+          <svg viewBox="0 0 900 600" width="16" height="11" style="border-radius:2px;" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="600" fill="#01411C"/>
+            <rect width="225" height="600" fill="#FFFFFF"/>
+            <circle cx="562.5" cy="300" r="180" fill="#FFFFFF"/>
+            <circle cx="598" cy="264.5" r="162" fill="#01411C"/>
+            <g transform="translate(605, 240) rotate(45)">
+              <polygon points="0,-42 12,-13 42,-13 18,5 27,34 0,16 -27,34 -18,5 -42,-13 -12,-13" fill="#FFFFFF"/>
+            </g>
+          </svg>
+        </span>
+        <span id="announcement-text" style="transition:opacity 0.3s ease;">
+          Free Express Delivery All Over Pakistan on orders above Rs. 5,000 | 100% Optical Satisfaction Guarantee
+        </span>
+      </div>
+      <div style="display:none; gap:16px; align-items:center;" class="desktop-topbar-right">
+        <a href="#" onclick="App.openDeliveryModal(); return false;" style="color:#fff; text-decoration:none; font-size:12px; display:flex; align-items:center; gap:4px; opacity:0.9;">
+          <span>🚚 Delivery & Policy</span>
+        </a>
+        <a href="#" onclick="App.openTrackingModal(); return false;" style="color:var(--gold-light); text-decoration:none; font-size:12px; display:flex; align-items:center; gap:4px; font-weight:700;">
+          <span>📦 Track Order</span>
+        </a>
+        <span>Need Help? Call / WhatsApp: <a href="https://wa.me/923241383370" target="_blank" style="color:#fff; font-weight:700;">0324-1383370</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <!-- Brand Logo -->
+      <a href="/" class="brand-logo" id="header-brand-logo">
+        <img src="/images/logo.svg" alt="FabOptic Logo">
+      </a>
+
+      <!-- Desktop Nav Links (Clean Single-Line Hierarchy with Dropdowns) -->
+      <ul class="nav-links" style="display:none;" id="desktop-nav">
+        <li><a href="#catalog" class="active filter-nav-link" data-filter="all">All Eyewear</a></li>
+        <li class="nav-dropdown-item">
+          <a href="#catalog" class="filter-nav-link" data-filter="sunglasses">
+            <span>Sunglasses</span>
+            <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+          </a>
+          <ul class="nav-dropdown-menu">
+            <li><a href="#catalog" class="filter-nav-link" data-filter="mens-sunglasses">Men's Sunglasses</a></li>
+            <li><a href="#catalog" class="filter-nav-link" data-filter="womens-sunglasses">Women's Sunglasses</a></li>
+          </ul>
+        </li>
+        <li class="nav-dropdown-item">
+          <a href="#catalog" class="filter-nav-link" data-filter="eyeglasses">
+            <span>Eyeglasses</span>
+            <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+          </a>
+          <ul class="nav-dropdown-menu">
+            <li><a href="#catalog" class="filter-nav-link" data-filter="mens-eyeglasses">Men's Eyeglasses</a></li>
+            <li><a href="#catalog" class="filter-nav-link" data-filter="womens-eyeglasses">Women's Eyeglasses</a></li>
+            <li><a href="#catalog" class="filter-nav-link" data-filter="clip-on">Clip-On (2-in-1)</a></li>
+          </ul>
+        </li>
+        <li class="nav-dropdown-item">
+          <a href="#catalog" class="filter-nav-link" data-filter="lens">
+            <span>Lenses</span>
+            <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+          </a>
+          <ul class="nav-dropdown-menu">
+            <li><a href="#catalog" class="filter-nav-link" data-filter="contact-lens">Contact Lenses</a></li>
+            <li><a href="#catalog" class="filter-nav-link" data-filter="fashion-lens">Fashion Lenses</a></li>
+            <li><a href="#catalog" class="filter-nav-link" data-filter="prescription-lens">Prescription Lenses</a></li>
+          </ul>
+        </li>
+        <li><a href="#catalog" class="filter-nav-link" data-filter="accessories">Accessories</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+      </ul>
+
+      <!-- Action Items & Search -->
+      <div class="nav-actions">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input type="text" id="search-input" class="search-input" placeholder="Search frames, titanium...">
+        </div>
+
+        <!-- Track Order Shortcut Button -->
+        <button class="try-on-pill-btn" onclick="App.openTrackingModal()" title="Track Your Order" style="background:var(--color-gray-100); color:var(--color-black); border-color:var(--color-gray-300);">
+          <span>📦</span>
+          <span>Track Order</span>
+        </button>
+
+        <!-- Eye Consultation Booking Shortcut Button -->
+        <button class="try-on-pill-btn" onclick="App.openConsultationModal()" title="Book Free Eye Exam">
+          <span>📅</span>
+          <span>Free Eye Exam</span>
+        </button>
+
+        <!-- Owner Management Suite (Only shown when Owner is logged in) -->
+        <button class="try-on-pill-btn" id="nav-owner-portal-btn" onclick="App.openAdminModal()" style="display:none; background:#18181b; color:#d4af37; border:1px solid #d4af37; font-weight:700;" title="Owner Management Portal (Add/Edit Products)">
+          <span>👑</span>
+          <span>Owner Suite</span>
+        </button>
+
+        <!-- User Sign In / Customer Account -->
+        <button class="try-on-pill-btn" id="nav-auth-btn" onclick="App.handleUserNavClick()" title="Sign In or Register" style="background:var(--color-black); color:var(--color-white); font-weight:700; border-color:var(--color-black);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span id="nav-user-label">Sign In / Register</span>
+        </button>
+
+        <!-- Wishlist -->
+        <button class="action-btn" id="nav-wishlist-btn" title="Wishlist" onclick="Cart.showToast('Showing your saved frames in catalog');">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="badge-counter wishlist-count-badge" style="display:none;">0</span>
+        </button>
+
+        <!-- Cart Trigger -->
+        <button class="action-btn open-cart-btn" id="nav-cart-btn" title="Shopping Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span class="badge-counter cart-count-badge" style="display:none;">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION (Exact FabDecor Animations & Hierarchy) -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <!-- Animated Badge -->
+        <div class="hero-badge hero-pill-badge">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+            <path d="M15 18H9"></path>
+            <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+            <circle cx="17" cy="18" r="2"></circle>
+            <circle cx="7" cy="18" r="2"></circle>
+          </svg>
+          <span>Free Delivery All Over Pakistan</span>
+          <span class="animate-pk-flag-wave" style="display:inline-flex;">
+            <svg viewBox="0 0 900 600" width="14" height="10" style="border-radius:2px;" xmlns="http://www.w3.org/2000/svg">
+              <rect width="900" height="600" fill="#01411C"/>
+              <rect width="225" height="600" fill="#FFFFFF"/>
+              <circle cx="562.5" cy="300" r="180" fill="#FFFFFF"/>
+              <circle cx="598" cy="264.5" r="162" fill="#01411C"/>
+              <g transform="translate(605, 240) rotate(45)">
+                <polygon points="0,-42 12,-13 42,-13 18,5 27,34 0,16 -27,34 -18,5 -42,-13 -12,-13" fill="#FFFFFF"/>
+              </g>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Main Heading -->
+        <h1 class="hero-h1">FIND EYEWEAR THAT MATCHES YOUR STYLE</h1>
+
+        <!-- Subheading -->
+        <p class="hero-p">
+          Explore our handcrafted collection of titanium frames, blue-light computer glasses, and German ZEISS-grade prescription lenses tailored for flawless vision and unmatched elegance.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="hero-btn-group">
+          <a href="#catalog" class="hero-btn primary-btn" id="hero-shop-btn">Shop Now</a>
+          <button class="hero-btn secondary-btn" onclick="App.openConsultationModal()">
+            <span>📅 Free Eye Exam</span>
+          </button>
+        </div>
+
+        <!-- Stats Row (Exact FabDecor 3-column stats) -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">UV400 & Blue Shield</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">2,500+</span>
+            <span class="stat-label">High-Quality Frames</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">45,000+</span>
+            <span class="stat-label">Happy Pakistani Clients</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Showcase -->
+      <div class="hero-img hero-visual" id="hero-visual-card">
+        <img src="/images/hero-eyewear.svg" alt="Luxury Aviator Titanium Frame Showcase">
+        <div class="hero-floating-badge">
+          <div class="badge-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:12px; font-weight:800; text-transform:uppercase;">1-Year Frame Warranty</div>
+            <div style="font-size:11px; color:var(--color-gray-500);">Anti-Scratch & Breakage Coverage</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INFINITE MARQUEE TICKER (Exact FabDecor 22s Linear Animation) -->
+  <section class="marquee-section">
+    <div class="marquee-inner">
+      <div class="marquee-group">
+        <span class="marquee-item">SIGNATURE OPTICAL</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">TIMELESS TITANIUM</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">BLUE LIGHT SHIELD</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">POLARIZED SUN</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">ACETATE LUXE</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">ZEISS-GRADE CLARITY</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">GERMAN HINGES</span>
+        <span class="marquee-divider">✦</span>
+      </div>
+      <div class="marquee-group">
+        <span class="marquee-item">SIGNATURE OPTICAL</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">TIMELESS TITANIUM</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">BLUE LIGHT SHIELD</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">POLARIZED SUN</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">ACETATE LUXE</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">ZEISS-GRADE CLARITY</span>
+        <span class="marquee-divider">✦</span>
+        <span class="marquee-item">GERMAN HINGES</span>
+        <span class="marquee-divider">✦</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STOREFRONT CATALOG SECTION -->
+  <section class="store-section" id="catalog">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">DISCOVER OUR FRAMES</h2>
+        <p class="section-subtitle">Crafted with Japanese Titanium, Italian Acetate, and high-index blue shield optics.</p>
+      </div>
+
+      <!-- Category Filter Pills (Exact OptixOne Category Hierarchy) -->
+      <div class="filter-tabs" id="category-pills">
+        <button class="filter-tab active" data-filter="all">All Eyewear</button>
+        <button class="filter-tab" data-filter="mens-sunglasses">Men's Sunglasses</button>
+        <button class="filter-tab" data-filter="womens-sunglasses">Women's Sunglasses</button>
+        <button class="filter-tab" data-filter="mens-eyeglasses">Men's Eye Glasses</button>
+        <button class="filter-tab" data-filter="womens-eyeglasses">Women's Eye Glasses</button>
+        <button class="filter-tab" data-filter="clip-on">Clip-On (2-in-1)</button>
+        <button class="filter-tab" data-filter="contact-lens">Contact Lenses</button>
+        <button class="filter-tab" data-filter="fashion-lens">Fashion Lenses</button>
+        <button class="filter-tab" data-filter="prescription-lens">Prescription Lenses</button>
+        <button class="filter-tab" data-filter="accessories">Care & Accessories</button>
+      </div>
+    </div>
+
+    <!-- Secondary Filters & Sorting Controls -->
+    <div class="controls-bar">
+      <div class="secondary-filters">
+        <select class="filter-select" id="gender-filter-select">
+          <option value="all">All Genders</option>
+          <option value="unisex">Unisex</option>
+          <option value="men">Men's Frames</option>
+          <option value="women">Women's Frames</option>
+        </select>
+
+        <select class="filter-select" id="shape-filter-select">
+          <option value="all">All Frame Shapes</option>
+          <option value="aviator">Aviator</option>
+          <option value="wayfarer">Wayfarer</option>
+          <option value="round">Round</option>
+          <option value="cateye">Cat-Eye</option>
+          <option value="square">Square</option>
+          <option value="geometric">Geometric</option>
+        </select>
+
+        <select class="filter-select" id="sort-filter-select">
+          <option value="popular">Featured & Bestsellers</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
+
+      <div style="font-size:13px; font-weight:700; color:var(--color-gray-600);" id="product-count-display">
+        Showing 12 Eyewear Frames
+      </div>
+    </div>
+
+    <!-- Dynamic Product Cards Grid -->
+    <div class="products-grid" id="products-grid">
+      <!-- Injected by app.js -->
+    </div>
+  </section>
+
+
+  <!-- EYE CARE, WE CARE — VISION CONSULTATION BANNER (Inspired by OptixOne) -->
+  <section class="tryon-banner" style="margin-top: -10px;">
+    <div class="tryon-banner-inner" style="background: linear-gradient(135deg, #0d3859 0%, #061a29 100%); border-color: rgba(56, 189, 248, 0.2);">
+      <div>
+        <span style="font-size:12px; font-weight:800; letter-spacing:0.1em; color:#38bdf8; text-transform:uppercase;">Eye Care • We Care</span>
+        <h3 style="color:#fff;">NEED A PRESCRIPTION TEST OR EXPERT FRAME ADVICE?</h3>
+        <p style="color:#bae6fd;">Book a free online optometrist consultation or in-person optical checkup across Faisalabad, Lahore, and Karachi.</p>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="primary-btn" id="open-consultation-btn" style="background:#38bdf8; color:#0f172a; white-space:nowrap; font-weight:800;">
+          📅 Book Free Eye Exam
+        </button>
+        <a href="https://wa.me/923241383370?text=Hi%20FabOptic!%20I%20want%20to%20consult%20with%20an%20optometrist%20regarding%20my%20prescription." target="_blank" class="secondary-btn" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.3); white-space:nowrap;">
+          💬 WhatsApp Optometrist
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMER REVIEWS SECTION (Exact FabDecor Layout) -->
+  <section class="reviews-section" id="reviews">
+    <div class="reviews-header">
+      <div>
+        <h2>OUR HAPPY CUSTOMERS</h2>
+        <p style="color:var(--color-gray-500); font-size:14px; margin-top:4px;">Verified reviews from optical customers across Karachi, Lahore, and Islamabad.</p>
+      </div>
+
+      <div class="reviews-nav">
+        <button class="write-review-btn" id="write-review-open-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 21h8"></path>
+            <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
+          </svg>
+          <span>Write a Review</span>
+        </button>
+        <button class="slider-btn" id="reviews-prev-btn" title="Previous Reviews">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+        <button class="slider-btn" id="reviews-next-btn" title="Next Reviews">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Review Cards Track -->
+    <div class="reviews-slider-track" id="reviews-slider-track">
+      <!-- Injected by app.js -->
+    </div>
+  </section>
+
+  <!-- NEWSLETTER SECTION (Exact FabDecor Component) -->
+  <section class="newsletter-section">
+    <div class="newsletter-container">
+      <h2 class="newsletter-h2">STAY UPTO DATE ABOUT OUR LATEST OFFERS</h2>
+
+      <form class="newsletter-form" id="newsletter-form">
+        <div class="newsletter-input-group">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"></path>
+          </svg>
+          <input type="email" name="email" class="newsletter-input" placeholder="Enter your email address" required>
+        </div>
+
+        <div class="newsletter-input-group">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+          <input type="tel" name="phone" class="newsletter-input" placeholder="Enter phone number (03XX-XXXXXXX)">
+        </div>
+
+        <button type="submit" class="newsletter-submit-btn">
+          <span class="btn-fill"></span>
+          <span class="btn-text">Subscribe to Newsletter</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER (Exact FabDecor 5 Columns) -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-columns">
+        <!-- Brand column -->
+        <div class="footer-brand">
+          <a href="/">
+            <img src="/images/logo.svg" alt="FabOptic Co" style="height:36px; mix-blend-mode:multiply;">
+          </a>
+          <p>
+            Premium handcrafted optical frames and ZEISS-grade prescription lenses — bringing clarity, comfort, and timeless elegance to Pakistan.
+          </p>
+          <div class="footer-socials">
+            <a href="https://wa.me/923241383370" target="_blank" class="social-circle" title="WhatsApp">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.92-9.91-9.92z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank" class="social-circle" title="Instagram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            <a href="https://facebook.com" target="_blank" class="social-circle" title="Facebook">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- COMPANY -->
+        <div class="footer-col">
+          <h4>COMPANY</h4>
+          <a href="#catalog" class="filter-nav-link" data-filter="all">New Arrivals</a>
+          <a href="#catalog" class="filter-nav-link" data-filter="sunglasses">On Sale</a>
+          <a href="#catalog">All Products</a>
+          <a href="#" onclick="App.openTrackingModal(); return false;">📦 Track My Order</a>
+        </div>
+
+        <!-- HELP -->
+        <div class="footer-col">
+          <h4>HELP</h4>
+          <a href="https://wa.me/923241383370" target="_blank">WhatsApp Support (24/7)</a>
+          <a href="#" onclick="App.openDeliveryModal(); return false;">Delivery & Shipping Details</a>
+          <a href="#" onclick="App.openDeliveryModal(); return false;">7-Day Optical Guarantee</a>
+          <a href="mailto:support@faboptic.pk">support@faboptic.pk</a>
+        </div>
+
+        <!-- FAQ -->
+        <div class="footer-col">
+          <h4>FAQ</h4>
+          <a href="#" onclick="App.openConsultationModal(); return false;">Prescription & Doctor Slip</a>
+          <a href="#" onclick="App.openConsultationModal(); return false;">Free Eye Care Consultation</a>
+          <a href="#" onclick="App.openDeliveryModal(); return false;">Payment Methods (COD/JazzCash)</a>
+          <a href="#" onclick="App.openDeliveryModal(); return false;">Nationwide Dispatch Policy</a>
+        </div>
+
+        <!-- CONTACT US -->
+        <div class="footer-col">
+          <h4>CONTACT US</h4>
+          <a href="https://wa.me/923241383370" target="_blank">📞 0324-1383370</a>
+          <a href="mailto:support@faboptic.pk">💬 support@faboptic.pk</a>
+          <a href="#">📍 Optical Boulevard, Lahore & Faisalabad, Pakistan</a>
+        </div>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div>
+          <p>FabOpticCo © 2026, All Rights Reserved — Crafted with Haute Precision</p>
+        </div>
+        <div class="payment-badges">
+          <span class="payment-pill">Cash on Delivery</span>
+          <span class="payment-pill">Visa</span>
+          <span class="payment-pill">Mastercard</span>
+          <span class="payment-pill">JazzCash</span>
+          <span class="payment-pill">EasyPaisa</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING WHATSAPP BUTTON (Exact FabDecor Floating Component) -->
+  <div class="whatsapp-floating">
+    <aside class="whatsapp-tooltip">
+      <span class="pulse-dot">
+        <span class="dot-ping"></span>
+        <span class="dot-base"></span>
+      </span>
+      <span>Chat with our Optometrist on WhatsApp</span>
+    </aside>
+    <a href="https://wa.me/923241383370?text=Hi%20FabOptic!%20I%20want%20to%20inquire%20about%20prescription%20glasses." 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="whatsapp-circle-btn" 
+       title="WhatsApp Optometrist">
+      <div class="whatsapp-circle-inner">
+        <svg viewBox="0 0 32 32" width="28" height="28" fill="currentColor">
+          <path d="M16.002 0C7.164 0 0 7.164 0 16.002c0 2.825.738 5.484 2.031 7.794L.073 31.927l8.351-1.939A15.91 15.91 0 0 0 16.002 32C24.84 32 32 24.836 32 16.002 32 7.164 24.84 0 16.002 0zm0 29.333c-2.482 0-4.81-.667-6.822-1.831l-.489-.284-5.067 1.176 1.196-4.935-.318-.506A13.27 13.27 0 0 1 2.667 16C2.667 8.648 8.648 2.667 16.002 2.667 23.352 2.667 29.333 8.648 29.333 16c0 7.352-5.981 13.333-13.331 13.333zm7.323-9.972c-.401-.201-2.373-1.171-2.74-1.305-.368-.134-.636-.201-.904.201-.268.402-1.037 1.305-1.271 1.573-.235.268-.469.301-.87.1-.402-.201-1.698-.626-3.234-1.996-1.195-1.066-2.002-2.382-2.236-2.784-.235-.402-.025-.619.176-.819.181-.18.402-.469.603-.703.201-.235.268-.402.402-.67.134-.268.067-.502-.034-.703-.1-.201-.904-2.179-1.238-2.983-.325-.783-.655-.677-.904-.69-.234-.012-.502-.014-.77-.014-.268 0-.703.1-1.072.502-.368.402-1.406 1.373-1.406 3.35 0 1.977 1.44 3.886 1.641 4.154.201.268 2.834 4.327 6.866 6.069.959.414 1.708.662 2.292.848.963.306 1.84.263 2.533.159.773-.116 2.373-.97 2.708-1.908.335-.938.335-1.742.235-1.909-.101-.167-.369-.268-.77-.469z"></path>
+        </svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- MOBILE BOTTOM NAVIGATION (Matching FabDecor) -->
+  <nav class="mobile-bottom-nav">
+    <a href="/" class="bottom-nav-item active">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+      <span>Home</span>
+    </a>
+    <a href="#catalog" class="bottom-nav-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path></svg>
+      <span>Shop</span>
+    </a>
+    <a href="#" class="bottom-nav-item" onclick="App.openConsultationModal(); return false;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>Eye Care</span>
+    </a>
+    <a href="#" class="bottom-nav-item open-cart-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span class="badge-counter cart-count-badge" style="display:none; position:absolute; top:-4px; right:12px;">0</span>
+      <span>Cart</span>
+    </a>
+  </nav>
+
+  <!-- CART DRAWER SLIDEOVER -->
+  <div class="drawer-backdrop" id="cart-drawer-backdrop"></div>
+  <aside class="cart-drawer" id="cart-drawer">
+    <div class="drawer-header">
+      <h3>Your Optical Cart</h3>
+      <button class="close-drawer-btn" id="close-drawer-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Free Shipping Progress Bar -->
+    <div class="free-shipping-bar">
+      <div class="shipping-bar-text" id="shipping-meter-text">
+        Add <strong>Rs. 5,000</strong> more to unlock <strong>FREE Express Delivery</strong>!
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="shipping-meter-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Cart Items List -->
+    <div class="drawer-items-list" id="drawer-items-list">
+      <!-- Injected by cart.js -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="drawer-empty-state" style="display:none; flex-direction:column; align-items:center; justify-content:center; flex:1; text-align:center; padding:40px 20px;">
+      <span style="font-size:42px;">👓</span>
+      <h4 style="font-size:16px; font-weight:800; margin-top:12px;">Your Cart is Empty</h4>
+      <p style="font-size:13px; color:var(--color-gray-500); margin-top:4px;">Find your signature prescription glasses or sunglasses.</p>
+      <button class="primary-btn" style="margin-top:20px;" onclick="Cart.closeDrawer();">Browse Frames</button>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="drawer-footer" id="drawer-footer">
+      <div class="coupon-row">
+        <input type="text" id="coupon-input" class="coupon-input" placeholder="Promo code (FABOPTIC10)">
+        <button class="coupon-btn" id="apply-coupon-btn">Apply</button>
+      </div>
+
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span id="cart-subtotal-val">Rs. 0</span>
+      </div>
+      <div class="summary-row">
+        <span>Coupon Discount</span>
+        <span id="cart-discount-val">- Rs. 0</span>
+      </div>
+      <div class="summary-row">
+        <span>Nationwide Delivery</span>
+        <span id="cart-shipping-val">FREE</span>
+      </div>
+      <div class="summary-total">
+        <span>Total Payable</span>
+        <span id="cart-total-val">Rs. 0</span>
+      </div>
+
+      <button class="checkout-btn" id="proceed-checkout-btn">
+        Proceed to Checkout →
+      </button>
+      <div id="cart-auth-notice" style="font-size:11px; color:var(--color-gray-500); text-align:center; margin-top:8px;">
+        🔒 Account login or registration required before checkout
+      </div>
+    </div>
+  </aside>
+
+  <!-- LENS CUSTOMIZER & PRESCRIPTION MODAL -->
+  <div class="modal-overlay" id="lens-customizer-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="customizer-product-name">Customize Lenses & Prescription</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);">Frame Price: <strong id="customizer-frame-price">Rs. 4,950</strong></span>
+        </div>
+        <button class="close-drawer-btn" id="close-customizer-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display:flex; gap:16px; align-items:center; background:var(--color-gray-50); padding:14px; border-radius:16px; flex-wrap:wrap;">
+          <!-- Customizer Image with Next/Prev Swapping -->
+          <div style="position:relative; width:130px; height:90px; background:#fff; border:1px solid var(--color-gray-200); border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+            <img src="/images/hero-eyewear.svg" id="customizer-product-img" style="max-width:90%; max-height:90%; object-fit:contain; transition:opacity 0.2s ease;">
+            <button type="button" class="cust-img-nav prev" id="cust-img-prev-btn" onclick="App.slideCustomizerImage(-1)" title="Previous photo" style="position:absolute; left:4px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; font-size:12px; font-weight:bold;">‹</button>
+            <button type="button" class="cust-img-nav next" id="cust-img-next-btn" onclick="App.slideCustomizerImage(1)" title="Next photo" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; font-size:12px; font-weight:bold;">›</button>
+            <span id="cust-img-counter" style="position:absolute; bottom:2px; right:4px; font-size:9px; background:rgba(0,0,0,0.55); color:#fff; padding:1px 5px; border-radius:4px; display:none; font-weight:700;"></span>
+          </div>
+          <div style="flex:1; min-width:200px;">
+            <div class="customizer-step-title" style="margin-bottom:4px;">Frame Colorway:</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;" id="customizer-color-swatches"></div>
+            <!-- Clickable photo thumbnails if multiple photos exist -->
+            <div id="customizer-thumbnails-strip" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;"></div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="customizer-step-title">Step 1: Choose Your Lens Type</h4>
+          <div class="lens-options-grid" id="customizer-lens-options"></div>
+        </div>
+
+        <div id="prescription-form-section" style="display:none;">
+          <h4 class="customizer-step-title">Step 2: Enter Doctor Prescription (Optional)</h4>
+          <p style="font-size:12px; color:var(--color-gray-500); margin-bottom:10px;">
+            Enter values from your doctor prescription slip or choose to send a photo via WhatsApp.
+          </p>
+          
+          <div style="background:var(--color-gray-50); border:1px solid var(--color-gray-200); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+            <!-- Right Eye (OD) Row -->
+            <div>
+              <span style="font-size:11px; font-weight:800; color:var(--color-gray-600); text-transform:uppercase; letter-spacing:0.5px;">Right Eye (OD)</span>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:4px;">
+                <input type="text" id="rx-sph-r" class="form-input" style="padding:8px; font-size:12px; text-align:center;" placeholder="SPH (-1.25)">
+                <input type="text" id="rx-cyl-r" class="form-input" style="padding:8px; font-size:12px; text-align:center;" placeholder="CYL (-0.50)">
+                <input type="text" id="rx-axis-r" class="form-input" style="padding:8px; font-size:12px; text-align:center;" placeholder="AXIS (180°)">
+              </div>
+            </div>
+
+            <!-- Left Eye (OS) Row -->
+            <div>
+              <span style="font-size:11px; font-weight:800; color:var(--color-gray-600); text-transform:uppercase; letter-spacing:0.5px;">Left Eye (OS)</span>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:4px;">
+                <input type="text" id="rx-sph-l" class="form-input" style="padding:8px; font-size:12px; text-align:center;" placeholder="SPH (-1.25)">
+                <input type="text" id="rx-cyl-l" class="form-input" style="padding:8px; font-size:12px; text-align:center;" placeholder="CYL (-0.50)">
+                <input type="text" id="rx-axis-l" class="form-input" style="padding:8px; font-size:12px; text-align:center;" placeholder="AXIS (180°)">
+              </div>
+            </div>
+
+            <!-- Pupillary Distance -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--color-gray-200); padding-top:8px;">
+              <span style="font-size:12px; font-weight:700;">Pupillary Distance (PD):</span>
+              <input type="text" id="rx-pd" class="form-input" style="width:130px; padding:6px 10px; font-size:12px; text-align:center;" placeholder="e.g. 63 mm">
+            </div>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; margin-top:10px; cursor:pointer; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 12px; border-radius:8px;">
+            <input type="checkbox" id="rx-whatsapp-later" checked style="accent-color:#16a34a; width:16px; height:16px;">
+            <span>📱 <strong>WhatsApp Doctor Slip Later:</strong> I'll share a photo of my doctor slip via WhatsApp after checkout</span>
+          </label>
+        </div>
+
+        <div style="border-top:1px solid var(--color-gray-200); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:12px; color:var(--color-gray-500);">Total Configured Price:</span>
+            <div style="font-size:20px; font-weight:900; font-family:var(--font-display);" id="customizer-total-price">Rs. 4,950</div>
+          </div>
+          <button class="primary-btn" id="customizer-add-cart-btn">
+            Add Customized Pair to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal-overlay" id="checkout-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Express Checkout</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);">Cash on Delivery available all over Pakistan</span>
+        </div>
+        <button class="close-drawer-btn" onclick="Cart.closeCheckoutModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form id="checkout-order-form" style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Verified Customer Session Bar -->
+          <div id="checkout-auth-user-bar" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; border-radius:10px; font-size:12px; justify-content:space-between; align-items:center;">
+            <span>Verified Customer: <strong id="checkout-user-display-name">...</strong></span>
+            <span style="color:#166534; font-weight:700;">✓ Authenticated</span>
+          </div>
+
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" name="fullName" class="form-input" placeholder="e.g. Daniyal Khan" required>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label>Phone Number (WhatsApp) *</label>
+              <input type="tel" name="phone" class="form-input" placeholder="0324-1383370" required>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" class="form-input" placeholder="name@domain.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Complete Street Address *</label>
+            <input type="text" name="address" class="form-input" placeholder="House #, Street #, Sector / Area" required>
+          </div>
+
+          <div class="form-group">
+            <label>City *</label>
+            <select name="city" class="form-input" required>
+              <option value="Karachi">Karachi</option>
+              <option value="Lahore" selected>Lahore</option>
+              <option value="Islamabad">Islamabad</option>
+              <option value="Rawalpindi">Rawalpindi</option>
+              <option value="Faisalabad">Faisalabad</option>
+              <option value="Multan">Multan</option>
+              <option value="Peshawar">Peshawar</option>
+              <option value="Quetta">Quetta</option>
+              <option value="Sialkot">Sialkot</option>
+              <option value="Gujranwala">Gujranwala</option>
+              <option value="Other City">Other City (All Pakistan)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Payment Method</label>
+            <select name="paymentMethod" class="form-input">
+              <option value="Cash on Delivery (COD)">Cash on Delivery (COD) 🇵🇰</option>
+              <option value="JazzCash / EasyPaisa">JazzCash / EasyPaisa Transfer</option>
+              <option value="Bank Transfer">Direct Bank Transfer</option>
+            </select>
+          </div>
+
+          <!-- Checkout Order Cost Breakdown -->
+          <div style="background:var(--color-gray-50); border:1px solid var(--color-gray-200); padding:14px; border-radius:12px; display:flex; flex-direction:column; gap:8px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; color:var(--color-gray-600);">
+              <span>Order Subtotal:</span>
+              <span id="checkout-subtotal-amount">Rs. 0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; color:var(--color-gray-600);">
+              <span>Nationwide Delivery:</span>
+              <span id="checkout-shipping-fee" style="color:#16a34a; font-weight:700;">FREE</span>
+            </div>
+            <div id="checkout-discount-row" style="display:none; justify-content:space-between; color:#16a34a;">
+              <span>Promo Discount:</span>
+              <span id="checkout-discount-amount">- Rs. 0</span>
+            </div>
+            <div style="border-top:1px solid var(--color-gray-200); padding-top:8px; display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:15px;">
+              <span>Total Payable:</span>
+              <span id="checkout-payable-amount" style="font-family:var(--font-display); font-size:18px; font-weight:900; color:var(--color-black);">Rs. 0</span>
+            </div>
+          </div>
+
+          <div style="font-size:11.5px; color:var(--color-gray-500); display:flex; align-items:center; gap:6px;">
+            <span>🛡️ 7-Day Fit Guarantee • Inspect package upon delivery • Cash on Delivery</span>
+          </div>
+
+          <button type="submit" class="primary-btn" style="width:100%; padding:14px; font-size:14px; font-weight:800;">
+            Confirm Order (Cash on Delivery)
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="order-success-modal">
+    <div class="modal-card" style="text-align:center; max-width:500px;">
+      <div class="modal-body" style="padding:40px 24px; display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <div style="width:64px; height:64px; background:#f0fdf4; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#16a34a; font-size:32px;">
+          ✓
+        </div>
+        <h3 style="font-family:var(--font-display); font-size:22px; text-transform:uppercase;">Order Confirmed!</h3>
+        <p style="font-size:14px; color:var(--color-gray-600);">
+          Thank you, <strong id="confirmed-customer-name">Valued Customer</strong>! Your optical order has been placed.
+        </p>
+        <div style="background:var(--color-gray-100); padding:16px; border-radius:12px; width:100%; text-align:left; font-size:13px; display:flex; flex-direction:column; gap:6px;">
+          <div>Tracking Order ID: <strong id="confirmed-order-id" style="color:var(--color-black); font-size:15px;">FO-123456</strong></div>
+          <div>Total Amount: <strong id="confirmed-total-price">Rs. 4,950</strong></div>
+          <div>Delivery Address: <span id="confirmed-address">Lahore, Pakistan</span></div>
+          <div>Estimated Delivery: <strong>2 to 3 Business Days via TCS/Trax</strong></div>
+          <div style="border-top:1px dashed var(--color-gray-300); padding-top:6px; margin-top:2px; font-size:12px; color:var(--color-gray-600);">
+            📧 Receipt & dispatch updates sent to: <strong id="confirmed-email-notice">your email</strong>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; width:100%; margin-top:8px;">
+          <a id="whatsapp-track-btn" href="https://wa.me/923241383370" target="_blank" class="primary-btn" style="background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span>💬 Track / Confirm on WhatsApp</span>
+          </a>
+          <button class="secondary-btn" id="track-this-order-btn" style="border:1px solid var(--color-gray-300);" onclick="App.openTrackingModal(document.getElementById('confirmed-order-id').textContent)">
+            <span>📦 Open Live Tracking Portal</span>
+          </button>
+          <button class="secondary-btn" onclick="document.getElementById('order-success-modal').classList.remove('open'); document.body.style.overflow='';">
+            Continue Browsing Eyewear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER TRACKING PORTAL MODAL -->
+  <div class="modal-overlay" id="order-tracking-modal">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="modal-header">
+        <div>
+          <h3>Track Your Optical Order</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);">Live status of your prescription glasses & frames</span>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeTrackingModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="tracking-input-id" class="form-input" placeholder="Enter Order ID (e.g. FO-344751)" style="flex:1;">
+          <button class="primary-btn" onclick="App.lookupOrder()" style="padding:10px 18px; white-space:nowrap;">
+            Track
+          </button>
+        </div>
+
+        <!-- Tracking Results Container -->
+        <div id="tracking-result-box" style="display:none; flex-direction:column; gap:14px; background:var(--color-gray-50); border:1px solid var(--color-gray-200); border-radius:12px; padding:16px;">
+          <!-- Content populated dynamically -->
+        </div>
+
+        <div id="tracking-error-box" style="display:none; text-align:center; padding:16px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; color:#b91c1c; font-size:13px;">
+          Order not found. Please verify your Order ID or contact support on WhatsApp.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERY & OPTICAL GUARANTEE MODAL -->
+  <div class="modal-overlay" id="delivery-modal">
+    <div class="modal-card" style="max-width:580px;">
+      <div class="modal-header">
+        <div>
+          <h3>Delivery & Customer Guarantee</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);">Everything you need to know about shipping & quality</span>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeDeliveryModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px; font-size:13.5px; line-height:1.6;">
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:14px;">
+          <h4 style="color:#166534; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>🚚</span> Nationwide Express Shipping
+          </h4>
+          <p style="color:#15803d; margin:0; font-size:13px;">
+            <strong>Major Cities (Lahore, Karachi, Islamabad, Rawalpindi, Faisalabad):</strong> 24 to 48 Hours.<br>
+            <strong>All Other Cities & Towns across Pakistan:</strong> 2 to 4 Business Days.<br>
+            <strong>Delivery Fee:</strong> <strong>FREE</strong> for orders above Rs. 5,000 (Standard Rs. 299 for smaller orders).
+          </p>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
+          <h4 style="color:#0f172a; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>💳</span> Payment Methods
+          </h4>
+          <p style="color:#475569; margin:0; font-size:13px;">
+            • <strong>Cash on Delivery (COD):</strong> Pay cash when your parcel arrives.<br>
+            • <strong>JazzCash & EasyPaisa:</strong> Instant mobile wallet checkout.<br>
+            • <strong>Direct Bank Transfer:</strong> Meezan Bank, HBL, Bank Alfalah.
+          </p>
+        </div>
+
+        <div style="background:#fdf4ff; border:1px solid #f0abfc; border-radius:12px; padding:14px;">
+          <h4 style="color:#86198f; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>🛡️</span> 7-Day Optical Guarantee & Free Replacement
+          </h4>
+          <p style="color:#a21caf; margin:0; font-size:13px;">
+            If your prescription lenses feel uncomfortable or the frame doesn't fit your face structure perfectly, our optical lab will re-cut your lenses or exchange the frame free of charge within 7 days.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; border-top:1px solid var(--color-gray-200); padding-top:12px;">
+          <a href="https://wa.me/923241383370" target="_blank" class="primary-btn" style="flex:1; background:#25D366; text-align:center; padding:12px;">
+            💬 WhatsApp Support: 0324-1383370
+          </a>
+          <a href="mailto:support@faboptic.pk" class="secondary-btn" style="text-align:center; padding:12px;">
+            ✉️ Email Support
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WRITE A REVIEW MODAL -->
+  <div class="modal-overlay" id="write-review-modal">
+    <div class="modal-card" style="max-width:520px;">
+      <div class="modal-header">
+        <h3>Write a Review</h3>
+        <button class="close-drawer-btn" id="close-review-modal-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="write-review-form" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="form-group">
+            <label>Your Name *</label>
+            <input type="text" name="author" class="form-input" placeholder="e.g. Ali Ahmed" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label>City *</label>
+              <input type="text" name="city" class="form-input" placeholder="e.g. Karachi" required>
+            </div>
+            <div class="form-group">
+              <label>Rating</label>
+              <select name="rating" class="form-input">
+                <option value="5">★★★★★ (5 Stars)</option>
+                <option value="4">★★★★☆ (4 Stars)</option>
+                <option value="3">★★★☆☆ (3 Stars)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Glasses Model Purchased</label>
+            <input type="text" name="productName" class="form-input" placeholder="e.g. Aviator Titanium Gold">
+          </div>
+          <div class="form-group">
+            <label>Your Review & Experience *</label>
+            <textarea name="comment" rows="4" class="form-input" placeholder="Share your experience regarding frame quality, lenses clarity, and delivery..." required></textarea>
+          </div>
+          <button type="submit" class="primary-btn" style="width:100%; padding:12px;">Submit Verified Review</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTOMETRIST CONSULTATION MODAL (Inspired by OptixOne Eye Care) -->
+  <div class="modal-overlay" id="consultation-modal">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="modal-header">
+        <div>
+          <h3>Book Free Eye Consultation</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);">Connect with a certified Pakistani optometrist</span>
+        </div>
+        <button class="close-drawer-btn" id="close-consultation-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="consultation-form" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" name="fullName" class="form-input" placeholder="e.g. Dr. Haris Bilal" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label>WhatsApp Phone Number *</label>
+              <input type="tel" name="phone" class="form-input" placeholder="0324-1383370" required>
+            </div>
+            <div class="form-group">
+              <label>City *</label>
+              <select name="preferredCity" class="form-input">
+                <option value="Lahore">Lahore</option>
+                <option value="Faisalabad">Faisalabad</option>
+                <option value="Karachi">Karachi</option>
+                <option value="Islamabad">Islamabad</option>
+                <option value="Online WhatsApp Call">Online WhatsApp Video Call</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Preferred Date & Time</label>
+            <input type="text" name="preferredDate" class="form-input" placeholder="e.g. Tomorrow 3:00 PM">
+          </div>
+          <div class="form-group">
+            <label>Eye Vision Issue / Prescription Concern</label>
+            <textarea name="notes" rows="3" class="form-input" placeholder="Tell us if you have blurry distance vision, screen headaches, or want contact lenses guidance..."></textarea>
+          </div>
+          <button type="submit" class="primary-btn" style="width:100%; padding:13px; background:#0284c7;">
+            Confirm Optometrist Booking 📅
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. AUTHENTICATION MODAL (LOGIN & SIGNUP)   -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-card auth-modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="auth-modal-title">Welcome to FabOptic</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);">Sign in for customer orders or management access</span>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeAuthModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Active Session Status & Switch Banner -->
+        <div id="auth-logged-in-banner" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px 14px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; color:#166534; font-weight:700; text-transform:uppercase;">Currently Signed In</div>
+            <div style="font-size:13.5px; font-weight:800; color:#14532d;" id="auth-logged-in-user-text">Atelier Owner</div>
+          </div>
+          <button type="button" class="action-btn-mini danger" onclick="App.logoutUser()" style="padding:6px 12px; font-size:11.5px; font-weight:700;">
+            Sign Out
+          </button>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="auth-tab-login" onclick="App.switchAuthTab('login')">Sign In</button>
+          <button class="auth-tab-btn" id="auth-tab-register" onclick="App.switchAuthTab('register')">Create Account</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="login-form" style="display:flex; flex-direction:column; gap:14px;" onsubmit="App.handleLogin(event)">
+          <!-- Incorrect Credentials Alert Box -->
+          <div id="login-error-box" style="display:none; background:#fef2f2; border:1.5px solid #f87171; color:#991b1b; padding:12px 14px; border-radius:12px; font-size:12.5px; align-items:flex-start; gap:10px; box-shadow:0 4px 12px rgba(239,68,68,0.12);">
+            <span style="font-size:18px; line-height:1;">⚠️</span>
+            <div style="flex:1;">
+              <strong style="display:block; font-size:13px; color:#b91c1c; margin-bottom:2px;">Incorrect Email or Password</strong>
+              <span id="login-error-text" style="color:#7f1d1d; font-size:12px; line-height:1.4;">Incorrect email or password. Please verify your credentials and try again.</span>
+            </div>
+          </div>
+
+          <!-- Account Created Notice (Displayed when pushed from signup) -->
+          <div id="login-success-box" style="display:none; background:#f0fdf4; border:1.5px solid #86efac; color:#166534; padding:12px 14px; border-radius:12px; font-size:12.5px; align-items:flex-start; gap:10px; box-shadow:0 4px 12px rgba(34,197,94,0.12);">
+            <span style="font-size:20px; line-height:1;">🎉</span>
+            <div style="flex:1;">
+              <strong style="display:block; font-size:13px; color:#15803d; margin-bottom:2px;">Account Created Successfully!</strong>
+              <span id="login-success-text" style="color:#166534; font-size:12px; line-height:1.4;">Your account is ready. Please enter your password to sign in manually.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="e.g. customer@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+              <button type="button" class="password-toggle-btn" id="login-pass-toggle" onclick="App.togglePasswordVisibility('login-password', 'login-pass-toggle')" title="Show or hide password">👁️</button>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" checked>
+              <span>Remember me</span>
+            </label>
+            <a href="https://wa.me/923241383370?text=Hi%20FabOptic%2C%20I%20need%20help%20with%20my%20account%20password." target="_blank" style="color:var(--color-gray-600);">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="primary-btn" style="width:100%; padding:13px; font-weight:800;">
+            Sign In to Atelier
+          </button>
+
+          <!-- Discreet Management Login Link -->
+          <div style="text-align:center; margin-top:10px;">
+            <a href="#" onclick="App.fillOwnerDemoCredentials(); return false;" style="font-size:11px; color:var(--color-gray-400); text-decoration:none;">
+              🔒 Atelier Staff & Management Login
+            </a>
+          </div>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="register-form" style="display:none; flex-direction:column; gap:14px;" onsubmit="App.handleRegister(event)">
+          <!-- Registration Error Alert Box -->
+          <div id="register-error-box" style="display:none; background:#fef2f2; border:1.5px solid #f87171; color:#991b1b; padding:12px 14px; border-radius:12px; font-size:12.5px; align-items:flex-start; gap:10px; box-shadow:0 4px 12px rgba(239,68,68,0.12);">
+            <span style="font-size:18px; line-height:1;">⚠️</span>
+            <div style="flex:1;">
+              <strong style="display:block; font-size:13px; color:#b91c1c; margin-bottom:2px;">Registration Issue</strong>
+              <span id="register-error-text" style="color:#7f1d1d; font-size:12px; line-height:1.4;">Registration failed. Please check your information.</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="reg-name" class="form-input" placeholder="e.g. Daniyal Khan" required>
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Phone Number *</label>
+            <input type="tel" id="reg-phone" class="form-input" placeholder="0324-1383370" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="reg-email" class="form-input" placeholder="customer@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="reg-password" class="form-input" placeholder="Create a password" required minlength="4">
+              <button type="button" class="password-toggle-btn" id="reg-pass-toggle" onclick="App.togglePasswordVisibility('reg-password', 'reg-pass-toggle')" title="Show or hide password">👁️</button>
+            </div>
+          </div>
+
+          <button type="submit" class="primary-btn" style="width:100%; padding:13px; font-weight:800;">
+            Create Customer Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. CUSTOMER ACCOUNT & MY ORDERS MODAL      -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="customer-account-modal">
+    <div class="modal-card" style="max-width:640px;">
+      <div class="modal-header">
+        <div>
+          <h3>My Optical Account</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);" id="account-user-email">customer@example.com</span>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeCustomerModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Profile Card -->
+        <div style="background:var(--color-gray-50); border:1px solid var(--color-gray-200); border-radius:12px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 id="account-user-name" style="font-size:17px; font-weight:900; margin-bottom:2px;">Valued Customer</h4>
+            <span style="font-size:12px; color:var(--color-gray-600);" id="account-user-phone">Phone: 0324-1383370</span>
+          </div>
+          <button class="action-btn-mini danger" onclick="App.logoutUser()">
+            Log Out
+          </button>
+        </div>
+
+        <div>
+          <h4 style="font-size:14px; font-weight:800; text-transform:uppercase; margin-bottom:10px;">My Eyewear Orders</h4>
+          <div id="customer-orders-list" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. OWNER / MANAGEMENT ATELIER PORTAL       -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="admin-portal-modal">
+    <div class="modal-card admin-modal-card">
+      <div class="modal-header admin-header-gold">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">👑</span>
+            <h3 style="color:#fff; letter-spacing:0.5px;">FabOptic Haute Atelier • Owner Management Suite</h3>
+          </div>
+          <span style="font-size:12px; color:var(--gold-light);">Catalog Inventory, Real-time Stock, Price Editing & Order Fulfillment</span>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeAdminModal()" style="color:#fff;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding:20px; overflow-y:auto; flex:1;">
+        <!-- Metrics Bar -->
+        <div class="admin-stat-grid" id="admin-metrics-container">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="admin-nav-tabs">
+          <button class="admin-nav-btn active" id="admin-tab-inventory-btn" onclick="App.switchAdminTab('inventory')">
+            <span>👓</span> Catalog & Stock Management
+          </button>
+          <button class="admin-nav-btn" id="admin-tab-add-btn" onclick="App.switchAdminTab('add')">
+            <span>➕</span> Upload New Frame
+          </button>
+          <button class="admin-nav-btn" id="admin-tab-orders-btn" onclick="App.switchAdminTab('orders')">
+            <span>📦</span> Customer Orders & Dispatch
+          </button>
+        </div>
+
+        <!-- TAB 1: INVENTORY & STOCK MANAGEMENT -->
+        <div id="admin-tab-inventory" style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div class="search-box" style="flex:1; max-width:360px;">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <input type="text" id="admin-inventory-search" class="search-input" placeholder="Search inventory by title or shape..." oninput="App.filterAdminInventory()">
+            </div>
+            <button class="primary-btn" onclick="App.switchAdminTab('add')" style="padding:10px 18px; font-size:13px;">
+              + Add New Eyewear Frame
+            </button>
+          </div>
+
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Frame Preview</th>
+                  <th>Product Details</th>
+                  <th>Category</th>
+                  <th>Price (PKR)</th>
+                  <th>Stock Availability</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-inventory-tbody">
+                <!-- Injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: UPLOAD NEW PRODUCT -->
+        <div id="admin-tab-add" style="display:none; flex-direction:column; gap:16px;">
+          <form id="admin-add-product-form" style="display:flex; flex-direction:column; gap:16px;" onsubmit="App.handleCreateProduct(event)">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div class="form-group">
+                <label>Frame / Product Name *</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g. Aviator Titanium Carbon" required>
+              </div>
+              <div class="form-group">
+                <label>Badge Highlight</label>
+                <select name="badge" class="form-input">
+                  <option value="NEW ARRIVAL" selected>NEW ARRIVAL</option>
+                  <option value="BESTSELLER">BESTSELLER</option>
+                  <option value="LIMITED EDITION">LIMITED EDITION</option>
+                  <option value="POPULAR">POPULAR</option>
+                  <option value="TOP RATED">TOP RATED</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label>Category *</label>
+                <select name="category" class="form-input" required>
+                  <option value="mens-sunglasses">Men's Sunglasses</option>
+                  <option value="womens-sunglasses">Women's Sunglasses</option>
+                  <option value="mens-eyeglasses">Men's Eyeglasses</option>
+                  <option value="womens-eyeglasses">Women's Eyeglasses</option>
+                  <option value="clip-on">Clip-On (2-in-1)</option>
+                  <option value="prescription-lens">Prescription Lenses</option>
+                  <option value="accessories">Optical Accessories</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Frame Shape</label>
+                <select name="shape" class="form-input">
+                  <option value="aviator">Aviator</option>
+                  <option value="wayfarer">Wayfarer</option>
+                  <option value="round">Round</option>
+                  <option value="cateye">Cat-Eye</option>
+                  <option value="square">Square</option>
+                  <option value="hexagon">Hexagon</option>
+                  <option value="rimless">Rimless</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select name="gender" class="form-input">
+                  <option value="men">Men</option>
+                  <option value="women">Women</option>
+                  <option value="unisex" selected>Unisex</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label>Selling Price (Rs.) *</label>
+                <input type="number" name="price" class="form-input" placeholder="4500" required>
+              </div>
+              <div class="form-group">
+                <label>Original Price (Rs.)</label>
+                <input type="number" name="originalPrice" class="form-input" placeholder="5800">
+              </div>
+              <div class="form-group">
+                <label>Material</label>
+                <input type="text" name="material" class="form-input" placeholder="e.g. Japanese Titanium / Italian Acetate">
+              </div>
+            </div>
+
+            <!-- New Product Photos Gallery -->
+            <div class="form-group" style="background:var(--color-gray-50); border:1.5px solid var(--color-gray-200); border-radius:14px; padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                  <strong style="font-size:13.5px; color:var(--color-black);">📸 Frame Photos Gallery</strong>
+                  <div style="font-size:11.5px; color:var(--color-gray-500);">Add 1 photo or multiple photos (customers can swipe them on the storefront!)</div>
+                </div>
+                <span class="badge" id="new-prod-photo-count-badge" style="background:#f3f4f6; color:#374151; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px; border:1px solid #d1d5db;">1 Photo</span>
+              </div>
+
+              <!-- List of Photos for New Frame -->
+              <div id="new-prod-photos-container" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; min-height:84px; align-items:center;">
+                <!-- Dynamically populated chips -->
+              </div>
+
+              <!-- Add Photo Controls -->
+              <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+                <div style="font-size:12px; font-weight:700; color:var(--color-gray-700);">➕ Add Photo (Preset, File Upload, or URL):</div>
+                
+                <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                  <select id="new-add-photo-preset" class="form-input" style="padding:8px 12px; font-size:12.5px;">
+                    <option value="/images/aviator-gold.svg">Aviator Titanium Gold</option>
+                    <option value="/images/aviator-black.svg">Aviator Obsidian Black</option>
+                    <option value="/images/wayfarer-havana.svg">Wayfarer Havana Tortoiseshell</option>
+                    <option value="/images/wayfarer-black.svg">Wayfarer Glossy Black</option>
+                    <option value="/images/cateye-rose.svg">Cat-Eye Rose Noir</option>
+                    <option value="/images/crystal-round.svg">Crystal Clear Luxe Round</option>
+                    <option value="/images/geometric-hexagon.svg">Geometric Hexagon Gold</option>
+                    <option value="/images/rimless-executive.svg">Executive Rimless Silhouette</option>
+                    <option value="/images/blueshield-pro.svg">BlueShield Pro Dev Frame</option>
+                    <option value="/images/clipon-magnetic.svg">Magnetic 2-in-1 Clip-On</option>
+                    <option value="/images/clubmaster-retro.svg">Clubmaster Retro Havana</option>
+                    <option value="/images/sport-wrap.svg">Active Sport Wrap Polarized</option>
+                    <option value="/images/round-vintage.svg">Vintage Round Tortoise</option>
+                    <option value="/images/urban-square.svg">Urban Square Matte</option>
+                    <option value="/images/aviation-driver.svg">Aviation Driver Gradient</option>
+                  </select>
+                  <button type="button" class="primary-btn" onclick="App.addPhotoFromPresetToNew()" style="padding:8px 16px; font-size:12px; font-weight:700; white-space:nowrap;">
+                    + Add Preset
+                  </button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                  <input type="text" id="new-add-custom-photo-url" class="form-input" placeholder="Or paste image URL (https://... or /images/...)" style="padding:8px 12px; font-size:12px;">
+                  <button type="button" class="secondary-btn" onclick="App.addCustomUrlPhotoToNew()" style="padding:8px 14px; font-size:12px; font-weight:700; white-space:nowrap;">
+                    + Add URL
+                  </button>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:10px; padding-top:4px;">
+                  <input type="file" id="new-prod-file-input" accept="image/*" style="display:none;" onchange="App.handleNewMultiFileUpload(event)">
+                  <button type="button" class="action-btn-mini" onclick="document.getElementById('new-prod-file-input').click()" style="padding:7px 14px; font-size:12px; border-radius:8px; background:#f8fafc; border:1px solid #cbd5e1; font-weight:700; display:flex; align-items:center; gap:6px;">
+                    📁 Upload Photo from Your Device
+                  </button>
+                  <span style="font-size:11px; color:#6b7280;">(PNG, JPG, WEBP, SVG)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea name="description" rows="3" class="form-input" placeholder="Frame craftsmanship details, UV rating, hinge engineering..."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-gray-200); padding-top:16px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" name="inStock" checked style="width:18px; height:18px; accent-color:#16a34a;">
+                <span style="font-weight:700;">Set as "In Stock" immediately</span>
+              </label>
+              <button type="submit" class="primary-btn" style="padding:12px 24px;">
+                🚀 Publish Frame to Storefront
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB 3: CUSTOMER ORDERS & DISPATCH STATUS -->
+        <div id="admin-tab-orders" style="display:none; flex-direction:column; gap:14px;">
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>City</th>
+                  <th>Total Amount</th>
+                  <th>Payment</th>
+                  <th>Fulfillment Status</th>
+                  <th>Update Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-tbody">
+                <!-- Injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. EDIT PRODUCT MODAL                      -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="edit-product-modal">
+    <div class="modal-card" style="max-width:620px;">
+      <div class="modal-header">
+        <div>
+          <h3>Edit Eyewear Frame</h3>
+          <span style="font-size:12px; color:var(--color-gray-500);" id="edit-product-id-label">Editing Product</span>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeEditProductModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-product-form" style="display:flex; flex-direction:column; gap:14px;" onsubmit="App.handleUpdateProduct(event)">
+          <input type="hidden" name="id" id="edit-prod-id">
+
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" name="name" id="edit-prod-name" class="form-input" required>
+          </div>
+
+          <!-- Product Photos Gallery & Management (Multiple or Single Photo) -->
+          <div class="form-group" style="background:var(--color-gray-50); border:1.5px solid var(--color-gray-200); border-radius:14px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div>
+                <strong style="font-size:13.5px; color:var(--color-black);">📸 Frame Photos Gallery</strong>
+                <div style="font-size:11.5px; color:var(--color-gray-500);">Add a single photo or multiple photos. Customers can swipe/click arrows to view all photos!</div>
+              </div>
+              <span class="badge" id="edit-prod-photo-count-badge" style="background:#f3f4f6; color:#374151; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px; border:1px solid #d1d5db;">1 Photo</span>
+            </div>
+
+            <!-- List of Current Photos for this Frame -->
+            <div id="edit-prod-photos-container" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; min-height:84px; align-items:center;">
+              <!-- Dynamically rendered chips with thumbnail, primary tag, and delete button -->
+            </div>
+
+            <!-- Add Another Photo Controls (Preset, File Upload, or Custom URL) -->
+            <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+              <div style="font-size:12px; font-weight:700; color:var(--color-gray-700);">➕ Add Another Photo to this Frame:</div>
+              
+              <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                <select id="edit-add-photo-preset" class="form-input" style="padding:8px 12px; font-size:12.5px;">
+                  <option value="/images/aviator-gold.svg">Aviator Titanium Gold</option>
+                  <option value="/images/aviator-black.svg">Aviator Obsidian Black</option>
+                  <option value="/images/wayfarer-havana.svg">Wayfarer Havana Tortoiseshell</option>
+                  <option value="/images/wayfarer-black.svg">Wayfarer Glossy Black</option>
+                  <option value="/images/cateye-rose.svg">Cat-Eye Rose Noir</option>
+                  <option value="/images/crystal-round.svg">Crystal Clear Luxe Round</option>
+                  <option value="/images/geometric-hexagon.svg">Geometric Hexagon Gold</option>
+                  <option value="/images/rimless-executive.svg">Executive Rimless Silhouette</option>
+                  <option value="/images/blueshield-pro.svg">BlueShield Pro Dev Frame</option>
+                  <option value="/images/clipon-magnetic.svg">Magnetic 2-in-1 Clip-On</option>
+                  <option value="/images/clubmaster-retro.svg">Clubmaster Retro Havana</option>
+                  <option value="/images/sport-wrap.svg">Active Sport Wrap Polarized</option>
+                  <option value="/images/round-vintage.svg">Vintage Round Tortoise</option>
+                  <option value="/images/urban-square.svg">Urban Square Matte</option>
+                  <option value="/images/aviation-driver.svg">Aviation Driver Gradient</option>
+                </select>
+                <button type="button" class="primary-btn" onclick="App.addPhotoFromPresetToEdit()" style="padding:8px 16px; font-size:12px; font-weight:700; white-space:nowrap;">
+                  + Add Preset
+                </button>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr auto; gap:8px;">
+                <input type="text" id="edit-add-custom-photo-url" class="form-input" placeholder="Or paste image URL (https://... or /images/...)" style="padding:8px 12px; font-size:12px;">
+                <button type="button" class="secondary-btn" onclick="App.addCustomUrlPhotoToEdit()" style="padding:8px 14px; font-size:12px; font-weight:700; white-space:nowrap;">
+                  + Add URL
+                </button>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:10px; padding-top:4px;">
+                <input type="file" id="edit-prod-file-input" accept="image/*" style="display:none;" onchange="App.handleEditMultiFileUpload(event)">
+                <button type="button" class="action-btn-mini" onclick="document.getElementById('edit-prod-file-input').click()" style="padding:7px 14px; font-size:12px; border-radius:8px; background:#f8fafc; border:1px solid #cbd5e1; font-weight:700; display:flex; align-items:center; gap:6px;">
+                  📁 Upload Photo from Your Device
+                </button>
+                <span style="font-size:11px; color:#6b7280;">(PNG, JPG, WEBP, SVG)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label>Selling Price (Rs.) *</label>
+              <input type="number" name="price" id="edit-prod-price" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label>Original Price (Rs.)</label>
+              <input type="number" name="originalPrice" id="edit-prod-original-price" class="form-input">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label>Badge</label>
+              <select name="badge" id="edit-prod-badge" class="form-input">
+                <option value="">No Badge</option>
+                <option value="BESTSELLER">BESTSELLER</option>
+                <option value="NEW ARRIVAL">NEW ARRIVAL</option>
+                <option value="POPULAR">POPULAR</option>
+                <option value="TOP RATED">TOP RATED</option>
+                <option value="LIMITED EDITION">LIMITED EDITION</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Availability / Stock</label>
+              <select name="inStock" id="edit-prod-stock" class="form-input">
+                <option value="true">In Stock</option>
+                <option value="false">Out of Stock</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" id="edit-prod-desc" rows="3" class="form-input"></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-gray-200); padding-top:14px;">
+            <button type="button" class="action-btn-mini danger" onclick="App.handleDeleteFromEdit()">
+              Delete Frame
+            </button>
+            <button type="submit" class="primary-btn" style="padding:12px 24px;">
+              Save Frame Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/cart.js?v=2.7"></script>
+  <script src="/js/liveAlerts.js?v=2.7"></script>
+  <script src="/js/app.js?v=2.7"></script>
+
+</body>
+</html>

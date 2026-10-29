@@ -1,0 +1,20 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="300" cy="210" r="180" fill="#fdf4ff"/>
+  <g>
+    <!-- Hard Leather Eyewear Case -->
+    <rect x="120" y="160" width="230" height="120" rx="20" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
+    <path d="M120 200 C200 215 270 215 350 200" stroke="#27272a" stroke-width="3"/>
+    <circle cx="235" cy="205" r="7" fill="#D4AF37"/>
+    <text x="235" y="250" text-anchor="middle" font-family="'Syne', sans-serif" font-size="12" font-weight="800" fill="#D4AF37" letter-spacing="1">FABOPTIC ATELIER</text>
+
+    <!-- Anti-Fog Spray Bottle -->
+    <rect x="390" y="140" width="60" height="130" rx="10" fill="#0284c7"/>
+    <rect x="405" y="115" width="30" height="25" rx="4" fill="#cbd5e1"/>
+    <rect x="415" y="100" width="10" height="15" fill="#94a3b8"/>
+    <path d="M410 100 H430" stroke="#64748b" stroke-width="3"/>
+    <text x="420" y="200" text-anchor="middle" font-family="'Inter', sans-serif" font-size="9" font-weight="800" fill="#fff" transform="rotate(-90 420 200)">ANTI-FOG SPRAY</text>
+
+    <!-- Microfiber cleaning cloth -->
+    <polygon points="460,210 520,180 500,260 440,240" fill="#f472b6" opacity="0.85"/>
+  </g>
+</svg>

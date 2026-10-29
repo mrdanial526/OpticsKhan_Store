@@ -1,0 +1,25 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="roseGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D0C5"/>
+      <stop offset="50%" stop-color="#C57D71"/>
+      <stop offset="100%" stop-color="#8F4338"/>
+    </linearGradient>
+    <linearGradient id="noirGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D1A22"/>
+      <stop offset="100%" stop-color="#120A0E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="210" r="180" fill="#fff5f5"/>
+  <g>
+    <!-- Uplifted Cat-Eye silhouette Left -->
+    <path d="M80 120 C140 125 240 145 260 165 C270 210 240 270 185 275 C125 280 95 210 90 175 C85 140 70 125 80 120 Z" fill="#fff" stroke="url(#noirGradient)" stroke-width="8"/>
+    <!-- Uplifted Cat-Eye silhouette Right -->
+    <path d="M520 120 C460 125 360 145 340 165 C330 210 360 270 415 275 C475 280 505 210 510 175 C515 140 530 125 520 120 Z" fill="#fff" stroke="url(#noirGradient)" stroke-width="8"/>
+    <!-- Rose gold corner sweep wings -->
+    <path d="M72 120 Q120 120 140 125" stroke="url(#roseGold)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M528 120 Q480 120 460 125" stroke="url(#roseGold)" stroke-width="7" stroke-linecap="round"/>
+    <!-- Delicate Rose Gold Bridge -->
+    <path d="M260 175 C280 160 320 160 340 175" stroke="url(#roseGold)" stroke-width="4.5" stroke-linecap="round"/>
+  </g>
+</svg>

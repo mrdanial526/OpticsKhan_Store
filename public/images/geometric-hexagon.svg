@@ -1,0 +1,16 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="emeraldGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="210" r="180" fill="#f0fdf4"/>
+  <g>
+    <!-- Hexagon left -->
+    <polygon points="120,170 170,135 240,150 255,225 210,270 135,255" fill="url(#emeraldGold)" stroke="#D4AF37" stroke-width="4.5"/>
+    <!-- Hexagon right -->
+    <polygon points="480,170 430,135 360,150 345,225 390,270 465,255" fill="url(#emeraldGold)" stroke="#D4AF37" stroke-width="4.5"/>
+    <path d="M245 175 C275 160 325 160 355 175" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

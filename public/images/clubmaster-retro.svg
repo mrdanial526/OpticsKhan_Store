@@ -1,0 +1,23 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldWire" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDF73"/>
+      <stop offset="100%" stop-color="#AA771C"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="210" r="180" fill="#fdfbf7"/>
+  <g>
+    <!-- Heavy Dark Browline Top Left -->
+    <path d="M90 140 C140 135 240 140 260 160 L245 180 C230 170 140 165 105 170 Z" fill="#1a1a1a"/>
+    <!-- Thin Golden Wire Lower Left -->
+    <path d="M105 170 C110 240 160 270 205 270 C240 270 250 220 245 180" stroke="url(#goldWire)" stroke-width="3.5" fill="#f8fcff"/>
+
+    <!-- Heavy Dark Browline Top Right -->
+    <path d="M510 140 C460 135 360 140 340 160 L355 180 C370 170 460 165 495 170 Z" fill="#1a1a1a"/>
+    <!-- Thin Golden Wire Lower Right -->
+    <path d="M495 170 C490 240 440 270 395 270 C360 270 350 220 355 180" stroke="url(#goldWire)" stroke-width="3.5" fill="#f8fcff"/>
+
+    <!-- Gold Bridge -->
+    <path d="M260 165 C280 150 320 150 340 165" stroke="url(#goldWire)" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

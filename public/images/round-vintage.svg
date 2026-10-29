@@ -1,0 +1,21 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bronzeTitan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C39E"/>
+      <stop offset="50%" stop-color="#B87333"/>
+      <stop offset="100%" stop-color="#6E3D15"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="210" r="180" fill="#faf7f2"/>
+  <g>
+    <!-- Perfectly circular left frame -->
+    <circle cx="195" cy="210" r="72" fill="#f8fcff" stroke="url(#bronzeTitan)" stroke-width="5"/>
+    <!-- Perfectly circular right frame -->
+    <circle cx="405" cy="210" r="72" fill="#f8fcff" stroke="url(#bronzeTitan)" stroke-width="5"/>
+    <!-- Keyhole Bridge Arch -->
+    <path d="M267 210 C275 190 325 190 333 210" stroke="url(#bronzeTitan)" stroke-width="4.5" fill="none"/>
+    <!-- Slender Beta-titanium Temples -->
+    <path d="M123 210 L50 205" stroke="url(#bronzeTitan)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M477 210 L550 205" stroke="url(#bronzeTitan)" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

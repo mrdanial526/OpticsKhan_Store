@@ -1,0 +1,21 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="glossBlack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#333"/>
+      <stop offset="50%" stop-color="#0a0a0a"/>
+      <stop offset="100%" stop-color="#1f1f1f"/>
+    </linearGradient>
+    <linearGradient id="clearOpticLens2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eaf3f7" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#d6e8f2" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="210" r="180" fill="#f8f9fa"/>
+  <g>
+    <path d="M85 130 C125 125 250 135 270 148 C280 154 288 154 298 148 C318 135 443 125 483 130 C505 133 505 160 495 190 C485 220 475 270 435 285 C395 300 335 295 320 240 C315 225 310 205 290 205 C270 205 265 225 260 240 C245 295 185 300 145 285 C105 270 95 220 85 190 C75 160 75 133 85 130 Z" fill="url(#glossBlack)"/>
+    <path d="M115 152 C150 145 235 150 248 162 C255 170 252 210 242 245 C230 270 185 278 152 268 C125 258 110 220 110 180 C110 160 112 153 115 152 Z" fill="url(#clearOpticLens2)"/>
+    <path d="M453 152 C418 145 333 150 320 162 C313 170 316 210 326 245 C338 270 383 278 416 268 C443 258 458 220 458 180 C458 160 456 153 453 152 Z" fill="url(#clearOpticLens2)"/>
+    <ellipse cx="98" cy="142" rx="4" ry="2" transform="rotate(-15 98 142)" fill="#D4AF37"/>
+    <ellipse cx="470" cy="142" rx="4" ry="2" transform="rotate(15 470 142)" fill="#D4AF37"/>
+  </g>
+</svg>
