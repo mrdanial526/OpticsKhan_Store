@@ -133,7 +133,7 @@
         </button>
 
         <!-- Wishlist -->
-        <button class="action-btn" id="nav-wishlist-btn" title="Wishlist" onclick="Cart.showToast('Showing your saved frames in catalog');">
+        <button class="action-btn" id="nav-wishlist-btn" title="View Saved Favorites" onclick="App.openWishlistModal();">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
@@ -412,6 +412,20 @@
         </button>
       </form>
     </div>
+  <!-- RECENTLY VIEWED SECTION -->
+  <section class="recently-viewed-section" id="recently-viewed-section" style="display:none;">
+    <div style="max-width:1200px; margin:0 auto; padding:0 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="font-size:12px; font-weight:800; text-transform:uppercase; color:var(--gold-dark); letter-spacing:1px;">Based on your browse</span>
+          <h3 style="font-family:var(--font-display); font-size:20px; text-transform:uppercase; margin-top:2px;">Recently Viewed Eyewear</h3>
+        </div>
+        <button class="action-btn-mini" onclick="App.clearRecentlyViewed()" style="font-size:11px;">Clear History</button>
+      </div>
+      <div class="recently-viewed-grid" id="recently-viewed-grid">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
   </section>
 
   <!-- FOOTER (Exact FabDecor 5 Columns) -->
@@ -673,6 +687,29 @@
             <input type="checkbox" id="rx-whatsapp-later" checked style="accent-color:#16a34a; width:16px; height:16px;">
             <span>📱 <strong>WhatsApp Doctor Slip Later:</strong> I'll share a photo of my doctor slip via WhatsApp after checkout</span>
           </label>
+
+          <!-- Upload Doctor Slip Photo Directly -->
+          <div style="margin-top:10px; background:#fff; border:1.5px dashed #cbd5e1; border-radius:10px; padding:12px; text-align:center;">
+            <input type="file" id="rx-file-upload" accept="image/*" style="display:none;" onchange="App.handlePrescriptionFileUpload(event)">
+            <div id="rx-upload-prompt" style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:22px;">📸</span>
+              <strong style="font-size:12px; color:#1e293b;">Or Upload Photo of Prescription / Doctor Slip</strong>
+              <span style="font-size:11px; color:#64748b;">JPG, PNG up to 10MB</span>
+              <button type="button" class="action-btn-mini" onclick="document.getElementById('rx-file-upload').click()" style="margin-top:2px; padding:6px 14px; background:#f1f5f9; border:1px solid #cbd5e1; font-weight:700;">
+                Choose Photo / Take Picture
+              </button>
+            </div>
+            <div id="rx-upload-preview-box" style="display:none; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <img id="rx-preview-thumb" src="" style="width:44px; height:44px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;">
+                <div style="text-align:left;">
+                  <strong style="font-size:12px; color:#166534;" id="rx-preview-filename">prescription.jpg</strong>
+                  <div style="font-size:11px; color:#6b7280;">✓ Attached to this frame</div>
+                </div>
+              </div>
+              <button type="button" class="action-btn-mini danger" onclick="App.removePrescriptionFile()">Remove</button>
+            </div>
+          </div>
         </div>
 
         <div style="border-top:1px solid var(--color-gray-200); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
@@ -814,6 +851,9 @@
           <a id="whatsapp-track-btn" href="https://wa.me/923241383370" target="_blank" class="primary-btn" style="background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;">
             <span>💬 Track / Confirm on WhatsApp</span>
           </a>
+          <button class="secondary-btn" onclick="App.printOrderInvoice(document.getElementById('confirmed-order-id').textContent)" style="background:#f8fafc; border:1px solid #cbd5e1; font-weight:700;">
+            <span>🖨️ Print Packing Slip / Invoice</span>
+          </button>
           <button class="secondary-btn" id="track-this-order-btn" style="border:1px solid var(--color-gray-300);" onclick="App.openTrackingModal(document.getElementById('confirmed-order-id').textContent)">
             <span>📦 Open Live Tracking Portal</span>
           </button>
@@ -1199,6 +1239,9 @@
           <button class="admin-nav-btn" id="admin-tab-orders-btn" onclick="App.switchAdminTab('orders')">
             <span>📦</span> Customer Orders & Dispatch
           </button>
+          <button class="admin-nav-btn" id="admin-tab-coupons-btn" onclick="App.switchAdminTab('coupons')">
+            <span>🏷️</span> Promos & Coupons
+          </button>
         </div>
 
         <!-- TAB 1: INVENTORY & STOCK MANAGEMENT -->
@@ -1380,6 +1423,18 @@
 
         <!-- TAB 3: CUSTOMER ORDERS & DISPATCH STATUS -->
         <div id="admin-tab-orders" style="display:none; flex-direction:column; gap:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; background:#f8fafc; padding:12px 16px; border-radius:10px; border:1px solid #e2e8f0;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-weight:700; font-size:13px; color:#1e293b;">Order Operations:</span>
+              <button class="action-btn-mini" onclick="App.exportCourierCSV()" style="background:#16a34a; color:#fff; font-weight:700; padding:6px 14px;">
+                📥 Export Courier CSV (TCS/Trax)
+              </button>
+            </div>
+            <button class="action-btn-mini" id="admin-chime-toggle-btn" onclick="App.toggleOrderChime()" style="background:#fff; border:1px solid #cbd5e1; font-weight:700;">
+              🔊 New Order Chime: ON
+            </button>
+          </div>
+
           <div class="admin-table-container">
             <table class="admin-table">
               <thead>
@@ -1390,13 +1445,54 @@
                   <th>Total Amount</th>
                   <th>Payment</th>
                   <th>Fulfillment Status</th>
-                  <th>Update Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="admin-orders-tbody">
                 <!-- Injected dynamically -->
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- TAB 4: COUPONS & PROMOS -->
+        <div id="admin-tab-coupons" style="display:none; flex-direction:column; gap:16px;">
+          <div style="display:grid; grid-template-columns:1fr 1.3fr; gap:18px;">
+            <!-- Create Coupon Form -->
+            <form id="admin-add-coupon-form" onsubmit="App.handleCreateCoupon(event)" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px;">
+              <h4 style="font-size:14px; font-weight:800; margin:0;">Create New Promo Code</h4>
+              <div class="form-group">
+                <label>Promo Code *</label>
+                <input type="text" name="code" class="form-input" placeholder="e.g. EID2026 or SUMMER15" required style="text-transform:uppercase;">
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="form-group">
+                  <label>Discount %</label>
+                  <input type="number" name="discountPercent" class="form-input" placeholder="15" min="0" max="100">
+                </div>
+                <div class="form-group">
+                  <label>Or Flat PKR Off</label>
+                  <input type="number" name="flatDiscount" class="form-input" placeholder="500">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Minimum Spend (PKR)</label>
+                <input type="number" name="minSpend" class="form-input" placeholder="3000">
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="description" class="form-input" placeholder="e.g. 15% discount on optical orders">
+              </div>
+              <button type="submit" class="primary-btn" style="padding:10px;">+ Save Promo Code</button>
+            </form>
+
+            <!-- List Existing Coupons -->
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+              <h4 style="font-size:14px; font-weight:800; margin-bottom:12px;">Active Store Coupons</h4>
+              <div id="admin-coupons-list" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1535,10 +1631,76 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- 5. WISHLIST MODAL                          -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="wishlist-modal">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">❤️</span>
+          <h3>My Saved Frames</h3>
+        </div>
+        <button class="close-drawer-btn" onclick="App.closeWishlistModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="wishlist-items-container" style="display:flex; flex-direction:column; gap:10px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6. PRINTABLE INVOICE / PACKING SLIP MODAL  -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="invoice-modal">
+    <div class="modal-card" style="max-width:720px;">
+      <div class="modal-header no-print">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🖨️</span>
+          <h3>Printable Invoice & Courier Packing Slip</h3>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="primary-btn" onclick="window.print()" style="padding:8px 18px; font-size:12px; font-weight:700;">
+            🖨️ Print Now
+          </button>
+          <button class="close-drawer-btn" onclick="App.closeInvoiceModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <div id="printable-invoice-content" class="invoice-container">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7. PRESCRIPTION SLIP IMAGE VIEWER MODAL    -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="prescription-view-modal">
+    <div class="modal-card" style="max-width:640px;">
+      <div class="modal-header">
+        <h3>Doctor's Prescription Slip</h3>
+        <button class="close-drawer-btn" onclick="document.getElementById('prescription-view-modal').classList.remove('open'); document.body.style.overflow='';">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="text-align:center; padding:16px;">
+        <img id="prescription-full-img" src="" alt="Prescription Slip" style="max-width:100%; max-height:75vh; border-radius:8px; border:1px solid #cbd5e1; object-fit:contain;">
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
-  <script src="/js/cart.js?v=2.7"></script>
-  <script src="/js/liveAlerts.js?v=2.7"></script>
-  <script src="/js/app.js?v=2.7"></script>
+  <script src="/js/cart.js?v=2.8"></script>
+  <script src="/js/liveAlerts.js?v=2.8"></script>
+  <script src="/js/app.js?v=2.8"></script>
 
 </body>
 </html>

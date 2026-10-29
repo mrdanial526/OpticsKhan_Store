@@ -91,7 +91,10 @@ const Cart = {
   getDiscount() {
     if (!this.coupon) return 0;
     const subtotal = this.getSubtotal();
-    return Math.round((subtotal * this.coupon.discountPercent) / 100);
+    if (this.coupon.discountAmount !== undefined) {
+      return Math.min(subtotal, this.coupon.discountAmount);
+    }
+    return Math.round((subtotal * (this.coupon.discountPercent || 0)) / 100);
   },
 
   getShipping() {

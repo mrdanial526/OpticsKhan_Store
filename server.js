@@ -8,7 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Simulated real-time sales pool for the Socket.IO / live-stream sales toast
@@ -235,6 +236,39 @@ app.patch('/api/admin/orders/:orderId', (req, res) => {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
   res.json({ success: true, message: "Order status updated", data: order });
+});
+
+// --- REVIEWS & RATINGS ---
+app.get('/api/products/:id/reviews', (req, res) => {
+  const allReviews = db.getReviews();
+  const filtered = allReviews.filter(r => r.productId === req.params.id);
+  res.json({ success: true, data: filtered });
+});
+
+app.post('/api/products/:id/reviews', (req, res) => {
+  const { author, city, rating, comment } = req.body;
+  if (!comment) {
+    return res.status(400).json({ success: false, message: "Please enter your review comment." });
+  }
+  const review = db.addProductReview(req.params.id, { author, city, rating, comment });
+  res.status(201).json({ success: true, message: "Thank you for your verified optical review!", data: review });
+});
+
+// --- COUPON & PROMO CODE MANAGEMENT ---
+app.get('/api/admin/coupons', (req, res) => {
+  res.json({ success: true, data: db.getAllCoupons() });
+});
+
+app.post('/api/admin/coupons', (req, res) => {
+  const result = db.addCoupon(req.body);
+  if (!result.success) return res.status(400).json(result);
+  res.status(201).json({ success: true, message: "Promo coupon code created!", data: result.coupon });
+});
+
+app.delete('/api/admin/coupons/:code', (req, res) => {
+  const deleted = db.deleteCoupon(req.params.code);
+  if (!deleted) return res.status(404).json({ success: false, message: "Coupon code not found" });
+  res.json({ success: true, message: "Coupon removed" });
 });
 
 // 12. Real-time Server-Sent Events (SSE) for live sales notifications

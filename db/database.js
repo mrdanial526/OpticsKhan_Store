@@ -780,6 +780,68 @@ class Database {
     };
   }
 
+  getAllCoupons() {
+    return this.data.coupons || [];
+  }
+
+  addCoupon(payload) {
+    if (!payload.code) return { success: false, message: "Coupon code is required" };
+    const code = payload.code.toUpperCase().trim();
+    if (!this.data.coupons) this.data.coupons = [];
+    const idx = this.data.coupons.findIndex(c => c.code === code);
+    const newCoupon = {
+      code,
+      discountPercent: Number(payload.discountPercent) || 0,
+      flatDiscount: Number(payload.flatDiscount) || 0,
+      minSpend: Number(payload.minSpend) || 0,
+      description: payload.description || `${payload.discountPercent || 10}% off optical discount`
+    };
+    if (idx !== -1) {
+      this.data.coupons[idx] = newCoupon;
+    } else {
+      this.data.coupons.push(newCoupon);
+    }
+    this.save();
+    return { success: true, coupon: newCoupon };
+  }
+
+  deleteCoupon(code) {
+    if (!this.data.coupons) return false;
+    const clean = code.toUpperCase().trim();
+    const idx = this.data.coupons.findIndex(c => c.code === clean);
+    if (idx === -1) return false;
+    this.data.coupons.splice(idx, 1);
+    this.save();
+    return true;
+  }
+
+  addProductReview(productId, reviewData) {
+    const prod = this.data.products.find(p => p.id === productId);
+    const review = {
+      id: `rev-${Date.now().toString().slice(-4)}`,
+      productId,
+      author: reviewData.author || "Verified Customer",
+      city: reviewData.city || "Pakistan",
+      rating: Math.min(5, Math.max(1, Number(reviewData.rating) || 5)),
+      date: "Just now",
+      comment: reviewData.comment || "",
+      productName: prod ? prod.name : "FabOptic Frame",
+      verifiedBuyer: true
+    };
+    if (!this.data.reviews) this.data.reviews = [];
+    this.data.reviews.unshift(review);
+
+    if (prod) {
+      prod.reviewsCount = (prod.reviewsCount || 0) + 1;
+      const allProductReviews = this.data.reviews.filter(r => r.productId === productId);
+      const totalScore = allProductReviews.reduce((sum, r) => sum + r.rating, 0);
+      prod.rating = Number((totalScore / allProductReviews.length).toFixed(1));
+      this.syncToMongo('product', { id: prod.id }, prod);
+    }
+    this.save();
+    return review;
+  }
+
   createOrder(orderPayload) {
     const orderId = `FO-${Math.floor(100000 + Math.random() * 900000)}`;
     const nowIso = new Date().toISOString();

@@ -24,13 +24,22 @@ const App = {
   editingProductImages: [],
   newProductImages: ['/images/aviator-gold.svg'],
 
+  // Prescription slip upload, recently viewed, and live order chime state
+  uploadedPrescriptionBase64: null,
+  recentlyViewed: [],
+  orderChimeEnabled: true,
+  lastKnownOrderCount: 0,
+  orderPollTimer: null,
+
   async init() {
     this.loadWishlist();
     this.loadCurrentUser();
+    this.loadRecentlyViewed();
     await this.fetchInitialData();
     this.bindEvents();
     this.renderProducts();
     this.renderReviews();
+    this.renderRecentlyViewed();
     this.updateAuthUI();
     this.renderNewProductImages();
   },
@@ -68,6 +77,71 @@ const App = {
     }
     this.saveWishlist();
     this.renderProducts();
+  },
+
+  openWishlistModal() {
+    const modal = document.getElementById('wishlist-modal');
+    const container = document.getElementById('wishlist-items-container');
+    if (!modal || !container) return;
+
+    if (!this.wishlist.length) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:36px 16px; color:#64748b;">
+          <div style="font-size:36px; margin-bottom:10px;">👓</div>
+          <h4 style="font-size:15px; font-weight:800; color:#1e293b; margin:0 0 6px;">Your Wishlist is Empty</h4>
+          <p style="font-size:12.5px; margin:0 0 16px;">Click the heart icon on any frame in our atelier to save it here for later.</p>
+          <button class="primary-btn" onclick="App.closeWishlistModal()" style="padding:8px 20px; font-size:12px;">Explore Frames</button>
+        </div>
+      `;
+    } else {
+      const wishlistedProducts = this.products.filter(p => this.wishlist.includes(p.id));
+      container.innerHTML = wishlistedProducts.map(p => {
+        const img = (p.images && p.images[0]) || '/images/hero-eyewear.svg';
+        const inStock = p.inStock !== false;
+        return `
+          <div class="wishlist-item-card" style="display:flex; align-items:center; gap:14px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px;">
+            <img src="${img}" alt="${p.name}" style="width:70px; height:45px; object-fit:contain; background:#f8fafc; border-radius:6px; padding:4px;">
+            <div style="flex:1;">
+              <h4 style="font-size:13.5px; font-weight:800; margin:0 0 2px; color:#0f172a;">${p.name}</h4>
+              <div style="font-size:11.5px; color:#64748b;">${p.shape} • ${p.material}</div>
+              <div style="font-size:13px; font-weight:900; color:#000; margin-top:2px;">Rs. ${p.price.toLocaleString()}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <button class="primary-btn" onclick="App.moveWishlistToCart('${p.id}')" style="padding:6px 12px; font-size:11.5px; font-weight:700;">
+                + Add to Cart
+              </button>
+              <button class="action-btn-mini danger" onclick="App.removeFromWishlist('${p.id}')" style="padding:4px 8px; font-size:11px;">
+                Remove
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  },
+
+  closeWishlistModal() {
+    const modal = document.getElementById('wishlist-modal');
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  },
+
+  moveWishlistToCart(productId) {
+    const prod = this.products.find(p => p.id === productId);
+    if (!prod) return;
+    Cart.addItem(prod);
+    this.toggleWishlist(productId);
+    this.openWishlistModal();
+  },
+
+  removeFromWishlist(productId) {
+    this.toggleWishlist(productId);
+    this.openWishlistModal();
   },
 
   async fetchInitialData() {
@@ -310,6 +384,8 @@ const App = {
     this.selectedColorIndex = 0;
     this.selectedFrameSize = 'Medium';
     this.customizerPhotoIndex = 0;
+    this.removePrescriptionFile();
+    this.addToRecentlyViewed(productId);
 
     const modal = document.getElementById('lens-customizer-modal');
     if (!modal) return;
@@ -472,7 +548,22 @@ const App = {
     const pd = document.getElementById('rx-pd')?.value;
     const whatsappRxCheck = document.getElementById('rx-whatsapp-later')?.checked;
 
-    if (whatsappRxCheck) {
+    if (this.uploadedPrescriptionBase64) {
+      prescription = {
+        prescriptionImage: this.uploadedPrescriptionBase64,
+        hasUploadedSlip: true,
+        note: "Doctor prescription slip uploaded by customer"
+      };
+      if (sphR || cylR || pd) {
+        prescription.right = { sph: sphR, cyl: cylR, axis: axisR };
+        prescription.left = {
+          sph: document.getElementById('rx-sph-l')?.value,
+          cyl: document.getElementById('rx-cyl-l')?.value,
+          axis: document.getElementById('rx-axis-l')?.value
+        };
+        prescription.pd = pd;
+      }
+    } else if (whatsappRxCheck) {
       prescription = { note: "Customer will send doctor slip via WhatsApp" };
     } else if (sphR || cylR || pd) {
       prescription = {
@@ -488,6 +579,54 @@ const App = {
 
     Cart.addItem(prod, this.selectedLensOption, prescription, color);
     this.closeLensCustomizer();
+  },
+
+  handlePrescriptionFileUpload(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Selected image is larger than 10MB. Please select a smaller photo.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.uploadedPrescriptionBase64 = e.target.result;
+      const previewBox = document.getElementById('rx-upload-preview-box');
+      const promptBox = document.getElementById('rx-upload-prompt');
+      const thumb = document.getElementById('rx-preview-thumb');
+      const filename = document.getElementById('rx-preview-filename');
+
+      if (thumb) thumb.src = this.uploadedPrescriptionBase64;
+      if (filename) filename.textContent = file.name;
+      if (previewBox) previewBox.style.display = 'flex';
+      if (promptBox) promptBox.style.display = 'none';
+
+      Cart.showToast("Doctor's prescription slip attached!");
+    };
+    reader.readAsDataURL(file);
+  },
+
+  removePrescriptionFile() {
+    this.uploadedPrescriptionBase64 = null;
+    const previewBox = document.getElementById('rx-upload-preview-box');
+    const promptBox = document.getElementById('rx-upload-prompt');
+    const fileInput = document.getElementById('rx-file-upload');
+    if (previewBox) previewBox.style.display = 'none';
+    if (promptBox) promptBox.style.display = 'flex';
+    if (fileInput) fileInput.value = '';
+  },
+
+  viewPrescriptionImage(url) {
+    if (!url) return;
+    const img = document.getElementById('prescription-full-img');
+    const modal = document.getElementById('prescription-view-modal');
+    if (img) img.src = url;
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
   },
 
   // --- REVIEWS MODULE (Exact FabDecor Layout) ---
@@ -523,6 +662,12 @@ const App = {
   openWriteReviewModal() {
     const modal = document.getElementById('write-review-modal');
     if (modal) {
+      if (this.currentUser) {
+        const authorInput = modal.querySelector('input[name="author"]');
+        const cityInput = modal.querySelector('input[name="city"]');
+        if (authorInput && !authorInput.value) authorInput.value = this.currentUser.name || '';
+        if (cityInput && !cityInput.value) cityInput.value = this.currentUser.city || '';
+      }
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -698,7 +843,7 @@ const App = {
     if (consultForm) consultForm.addEventListener('submit', (e) => this.handleConsultationSubmit(e));
 
     // Backdrop click handlers for all app modals
-    ['lens-customizer-modal', 'write-review-modal', 'consultation-modal', 'order-tracking-modal', 'delivery-modal', 'auth-modal', 'customer-account-modal', 'admin-portal-modal', 'edit-product-modal'].forEach(modalId => {
+    ['lens-customizer-modal', 'write-review-modal', 'consultation-modal', 'order-tracking-modal', 'delivery-modal', 'auth-modal', 'customer-account-modal', 'admin-portal-modal', 'edit-product-modal', 'wishlist-modal', 'invoice-modal', 'prescription-view-modal'].forEach(modalId => {
       const modal = document.getElementById(modalId);
       if (modal) {
         modal.addEventListener('click', (e) => {
@@ -987,6 +1132,10 @@ const App = {
               `).join('')}
             </div>
           </div>
+
+          <button class="secondary-btn" onclick="App.printOrderInvoice('${order.orderId}')" style="width:100%; text-align:center; padding:9px; background:#f8fafc; border:1px solid #cbd5e1; font-weight:700; font-size:12px; margin-top:4px;">
+            🖨️ Print Packing Slip / Invoice
+          </button>
 
           <a href="https://wa.me/923241383370?text=Hi%20FabOptic!%20Checking%20dispatch%20for%20Order%20%23${order.orderId}" target="_blank" class="primary-btn" style="text-align:center; padding:10px; background:#25D366; color:#fff; font-size:13px;">
             💬 WhatsApp Dispatch Desk for Updates
@@ -1445,6 +1594,14 @@ const App = {
     await this.refreshAdminStats();
     await this.refreshAdminInventory();
     await this.refreshAdminOrders();
+    await this.refreshAdminCoupons();
+
+    // Start background live polling for incoming orders while Owner Suite is open
+    if (!this.orderPollTimer) {
+      this.orderPollTimer = setInterval(() => {
+        this.refreshAdminOrders();
+      }, 20000);
+    }
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -1456,15 +1613,22 @@ const App = {
       modal.classList.remove('open');
       document.body.style.overflow = '';
     }
+    if (this.orderPollTimer) {
+      clearInterval(this.orderPollTimer);
+      this.orderPollTimer = null;
+    }
   },
 
   switchAdminTab(tabName) {
-    ['inventory', 'add', 'orders'].forEach(t => {
+    ['inventory', 'add', 'orders', 'coupons'].forEach(t => {
       const tabEl = document.getElementById(`admin-tab-${t}`);
       const btnEl = document.getElementById(`admin-tab-${t}-btn`);
       if (tabEl) tabEl.style.display = t === tabName ? 'flex' : 'none';
       if (btnEl) btnEl.classList.toggle('active', t === tabName);
     });
+    if (tabName === 'coupons') {
+      this.refreshAdminCoupons();
+    }
   },
 
   async refreshAdminStats() {
@@ -1940,12 +2104,24 @@ const App = {
       const tbody = document.getElementById('admin-orders-tbody');
       if (!tbody) return;
 
+      // Play chime if new order arrived while Owner Suite is active
+      if (this.lastKnownOrderCount > 0 && orders.length > this.lastKnownOrderCount && this.orderChimeEnabled) {
+        this.playNewOrderChime();
+        Cart.showToast('🔔 New Customer Order Received!');
+      }
+      this.lastKnownOrderCount = orders.length;
+
       if (!orders.length) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#888;">No orders placed yet.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = orders.map(o => `
+      tbody.innerHTML = orders.map(o => {
+        const rxItem = (o.items || []).find(it => it.prescription && it.prescription.prescriptionImage);
+        const hasRxImg = !!rxItem;
+        const rxImgUrl = rxItem ? rxItem.prescription.prescriptionImage : '';
+
+        return `
         <tr>
           <td>
             <strong style="font-size:13px;">#${o.orderId}</strong>
@@ -1954,6 +2130,7 @@ const App = {
           <td>
             <strong>${o.customer.fullName}</strong>
             <div style="font-size:11px; color:#666;">${o.customer.phone}</div>
+            <div style="font-size:10.5px; color:#888;">${o.customer.address}</div>
           </td>
           <td>${o.customer.city}</td>
           <td><strong>Rs. ${o.totalAmount.toLocaleString()}</strong></td>
@@ -1964,16 +2141,27 @@ const App = {
             </span>
           </td>
           <td>
-            <select class="form-input" style="padding:4px 8px; font-size:11.5px;" onchange="App.handleUpdateOrderStatus('${o.orderId}', this.value)">
+            <select class="form-input" style="padding:4px 8px; font-size:11.5px; width:100%;" onchange="App.handleUpdateOrderStatus('${o.orderId}', this.value)">
               <option value="Confirmed & Packing" ${o.status === 'Confirmed & Packing' ? 'selected' : ''}>Confirmed & Packing</option>
               <option value="Lenses Cut in Lab" ${o.status === 'Lenses Cut in Lab' ? 'selected' : ''}>Lenses Cut in Lab</option>
               <option value="16-pt QC Inspection Passed" ${o.status === '16-pt QC Inspection Passed' ? 'selected' : ''}>16-pt QC Inspection Passed</option>
               <option value="Dispatched with Courier TCS" ${o.status === 'Dispatched with Courier TCS' ? 'selected' : ''}>Dispatched with Courier TCS</option>
               <option value="Delivered & Verified" ${o.status === 'Delivered & Verified' ? 'selected' : ''}>Delivered & Verified</option>
             </select>
+            <div style="display:flex; gap:4px; margin-top:6px;">
+              <button class="action-btn-mini" onclick="App.printOrderInvoice('${o.orderId}')" style="font-size:10.5px; padding:3px 8px; font-weight:700; background:#f1f5f9; border:1px solid #cbd5e1; flex:1;" title="Print Packing Slip & Invoice">
+                🖨️ Packing Slip
+              </button>
+              ${hasRxImg ? `
+                <button class="action-btn-mini" onclick="App.viewPrescriptionImage('${rxImgUrl}')" style="font-size:10.5px; padding:3px 8px; font-weight:700; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; flex:1;" title="View Customer Rx Slip">
+                  📄 View Rx
+                </button>
+              ` : ''}
+            </div>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     } catch(e) {}
   },
 
@@ -2003,6 +2191,415 @@ const App = {
     } catch(e) {
       alert('Error updating order fulfillment status.');
     }
+  },
+
+  // ==========================================
+  // PRINTABLE INVOICE & COURIER PACKING SLIP
+  // ==========================================
+  async printOrderInvoice(orderId) {
+    if (!orderId) return;
+    const cleanId = orderId.toString().replace('#', '').trim();
+    try {
+      const res = await fetch(`/api/orders/${cleanId}`);
+      const data = await res.json();
+      if (!data.success || !data.data) {
+        alert('Could not find order details for invoice.');
+        return;
+      }
+      const order = data.data;
+      const invoiceEl = document.getElementById('printable-invoice-content');
+      if (!invoiceEl) return;
+
+      const orderDate = new Date(order.createdAt).toLocaleDateString('en-PK', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      const isCOD = (order.paymentMethod || '').toLowerCase().includes('cash');
+
+      invoiceEl.innerHTML = `
+        <div style="border-bottom:2px solid #0f172a; padding-bottom:14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-family:var(--font-display, serif); font-size:22px; font-weight:900; letter-spacing:0.5px; color:#0f172a;">FABOPTIC CO.</div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#475569; font-weight:700;">Luxury Eyewear Atelier & Precision Optical Lab</div>
+            <div style="font-size:11px; color:#64748b; margin-top:2px;">Lahore, Pakistan • WhatsApp: +92 324 1383370 • support@faboptic.pk</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="background:#0f172a; color:#fff; font-size:11px; font-weight:900; padding:4px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; display:inline-block;">
+              Official Packing Slip & Invoice
+            </div>
+            <div style="font-size:15px; font-weight:900; margin-top:6px; color:#0f172a;">#${order.orderId}</div>
+            <div style="font-size:11px; color:#64748b;">Date: ${orderDate}</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:16px; margin-bottom:16px;">
+          <!-- Consignee Details -->
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+            <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:800; color:#475569; margin-bottom:4px;">SHIP TO / CONSIGNEE</div>
+            <div style="font-size:14px; font-weight:900; color:#0f172a;">${order.customer.fullName}</div>
+            <div style="font-size:13px; font-weight:800; color:#2563eb; margin:2px 0;">📞 ${order.customer.phone}</div>
+            <div style="font-size:12px; color:#334155; line-height:1.4;">${order.customer.address}</div>
+            <div style="font-size:13px; font-weight:800; color:#0f172a; margin-top:2px;">📍 ${order.customer.city}, Pakistan</div>
+          </div>
+
+          <!-- Carrier & Payment Pill -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="background:${isCOD ? '#fef2f2' : '#f0fdf4'}; border:1.5px solid ${isCOD ? '#f87171' : '#86efac'}; border-radius:8px; padding:10px 12px; text-align:center;">
+              <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:800; color:${isCOD ? '#991b1b' : '#166534'};">
+                ${isCOD ? 'CASH ON DELIVERY (COLLECT FROM CUSTOMER)' : 'PAYMENT CONFIRMED / PREPAID'}
+              </div>
+              <div style="font-size:22px; font-weight:900; color:${isCOD ? '#dc2626' : '#15803d'}; font-family:var(--font-display, sans-serif); margin-top:2px;">
+                Rs. ${order.totalAmount.toLocaleString()}
+              </div>
+            </div>
+
+            <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:8px 12px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="color:#64748b;">Carrier:</span>
+                <strong style="color:#0f172a; margin-left:4px;">${order.courierName || 'TCS Express'}</strong>
+              </div>
+              ${order.courierTrackingNumber ? `<div><span style="color:#64748b;">Tracking:</span> <strong style="font-family:monospace; color:#2563eb;">${order.courierTrackingNumber}</strong></div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:12px;">
+          <thead>
+            <tr style="background:#f1f5f9; border-top:1px solid #cbd5e1; border-bottom:2px solid #94a3b8; text-align:left;">
+              <th style="padding:8px 10px; font-weight:800;">#</th>
+              <th style="padding:8px 10px; font-weight:800;">Frame & Optics Description</th>
+              <th style="padding:8px 10px; font-weight:800; text-align:center;">Qty</th>
+              <th style="padding:8px 10px; font-weight:800; text-align:right;">Unit Price</th>
+              <th style="padding:8px 10px; font-weight:800; text-align:right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map((it, idx) => `
+              <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:8px 10px; color:#64748b;">${idx + 1}</td>
+                <td style="padding:8px 10px;">
+                  <strong style="color:#0f172a;">${it.name}</strong>
+                  <div style="font-size:11px; color:#64748b;">Lens: ${it.lensName || 'Demo Lenses'} ${it.colorName ? `• Color: ${it.colorName}` : ''}</div>
+                  ${it.prescription && it.prescription.note ? `<div style="font-size:10.5px; color:#0369a1;">Note: ${it.prescription.note}</div>` : ''}
+                  ${it.prescription && it.prescription.right ? `<div style="font-size:10px; color:#475569; font-family:monospace;">R: SPH ${it.prescription.right.sph || '0'} CYL ${it.prescription.right.cyl || '0'} | L: SPH ${it.prescription.left.sph || '0'} CYL ${it.prescription.left.cyl || '0'} | PD: ${it.prescription.pd || 'N/A'}</div>` : ''}
+                </td>
+                <td style="padding:8px 10px; text-align:center;">${it.quantity || 1}</td>
+                <td style="padding:8px 10px; text-align:right;">Rs. ${it.price.toLocaleString()}</td>
+                <td style="padding:8px 10px; text-align:right; font-weight:800;">Rs. ${(it.price * (it.quantity || 1)).toLocaleString()}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <!-- Totals Calculation -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+          <div style="width:260px; display:flex; flex-direction:column; gap:4px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between; color:#64748b;">
+              <span>Subtotal:</span>
+              <strong style="color:#0f172a;">Rs. ${order.subtotal ? order.subtotal.toLocaleString() : order.totalAmount.toLocaleString()}</strong>
+            </div>
+            ${order.discount ? `
+              <div style="display:flex; justify-content:space-between; color:#16a34a;">
+                <span>Discount / Promo:</span>
+                <strong>- Rs. ${order.discount.toLocaleString()}</strong>
+              </div>
+            ` : ''}
+            <div style="display:flex; justify-content:space-between; color:#64748b;">
+              <span>Shipping Fee:</span>
+              <span>${order.deliveryFee === 0 ? 'FREE' : `Rs. ${order.deliveryFee}`}</span>
+            </div>
+            <div style="border-top:2px solid #0f172a; padding-top:6px; margin-top:2px; display:flex; justify-content:space-between; font-size:14px; font-weight:900; color:#0f172a;">
+              <span>Total Payable:</span>
+              <span>Rs. ${order.totalAmount.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optical Guarantee Disclaimer -->
+        <div style="background:#f8fafc; border-top:1px dashed #cbd5e1; padding:12px 14px; border-radius:6px; font-size:10.5px; color:#64748b; line-height:1.4;">
+          <strong>FabOptic 7-Day Optical Guarantee:</strong> If lenses need power calibration or fit adjustment, exchange within 7 days. Inspect flyer seal upon delivery. For queries, WhatsApp 0324-1383370 or email support@faboptic.pk.
+        </div>
+      `;
+
+      const modal = document.getElementById('invoice-modal');
+      if (modal) {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    } catch (e) {
+      alert('Error generating packing slip invoice.');
+    }
+  },
+
+  closeInvoiceModal() {
+    const modal = document.getElementById('invoice-modal');
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  },
+
+  // ==========================================
+  // 1-CLICK EXPORT COURIER CSV (TCS / TRAX)
+  // ==========================================
+  async exportCourierCSV() {
+    try {
+      const res = await fetch('/api/admin/orders');
+      const data = await res.json();
+      const orders = data.data || [];
+      if (!orders.length) {
+        alert('No orders available to export.');
+        return;
+      }
+
+      const headers = [
+        "Order ID",
+        "Consignee Name",
+        "Consignee Phone",
+        "Delivery Address",
+        "City",
+        "COD Amount (PKR)",
+        "Payment Mode",
+        "Items Summary",
+        "Courier",
+        "Tracking Number",
+        "Status",
+        "Order Date"
+      ];
+
+      const rows = orders.map(o => {
+        const itemsSummary = (o.items || []).map(i => `${i.name} (${i.lensName || 'Demo'}) x${i.quantity || 1}`).join('; ');
+        const isCOD = (o.paymentMethod || '').toLowerCase().includes('cash');
+        const codAmount = isCOD ? o.totalAmount : 0;
+        const dateStr = new Date(o.createdAt).toISOString().slice(0, 10);
+
+        return [
+          o.orderId,
+          `"${(o.customer.fullName || '').replace(/"/g, '""')}"`,
+          `"${(o.customer.phone || '').replace(/"/g, '""')}"`,
+          `"${(o.customer.address || '').replace(/"/g, '""')}"`,
+          `"${(o.customer.city || '').replace(/"/g, '""')}"`,
+          codAmount,
+          `"${(o.paymentMethod || '').replace(/"/g, '""')}"`,
+          `"${itemsSummary.replace(/"/g, '""')}"`,
+          `"${(o.courierName || 'TCS Express').replace(/"/g, '""')}"`,
+          `"${(o.courierTrackingNumber || '').replace(/"/g, '""')}"`,
+          `"${(o.status || 'Confirmed & Packing').replace(/"/g, '""')}"`,
+          dateStr
+        ].join(',');
+      });
+
+      const csvContent = [headers.join(','), ...rows].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `FabOptic_Courier_Manifest_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      Cart.showToast('Courier CSV manifest exported for TCS/Trax!');
+    } catch(e) {
+      alert('Error exporting courier CSV.');
+    }
+  },
+
+  // ==========================================
+  // LIVE AUDIO CHIME (WEB AUDIO API)
+  // ==========================================
+  toggleOrderChime() {
+    this.orderChimeEnabled = !this.orderChimeEnabled;
+    const btn = document.getElementById('admin-chime-toggle-btn');
+    if (btn) {
+      btn.textContent = this.orderChimeEnabled ? '🔊 New Order Chime: ON' : '🔇 New Order Chime: OFF';
+      btn.style.background = this.orderChimeEnabled ? '#fff' : '#f1f5f9';
+      btn.style.color = this.orderChimeEnabled ? '#0f172a' : '#64748b';
+    }
+    if (this.orderChimeEnabled) {
+      this.playNewOrderChime();
+    }
+  },
+
+  playNewOrderChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      // First tone: A5 (880 Hz)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, ctx.currentTime);
+      gain1.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start();
+      osc1.stop(ctx.currentTime + 0.28);
+
+      // Second tone: E6 (1320 Hz) chime
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.12);
+      gain2.gain.setValueAtTime(0.2, ctx.currentTime + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.48);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + 0.12);
+      osc2.stop(ctx.currentTime + 0.48);
+    } catch(e) {}
+  },
+
+  // ==========================================
+  // PROMO CODE & COUPON MANAGER
+  // ==========================================
+  async refreshAdminCoupons() {
+    try {
+      const res = await fetch('/api/admin/coupons');
+      const data = await res.json();
+      const coupons = data.data || [];
+      const listEl = document.getElementById('admin-coupons-list');
+      if (!listEl) return;
+
+      if (!coupons.length) {
+        listEl.innerHTML = '<div style="color:#64748b; font-size:12px; padding:12px; text-align:center;">No promo codes configured yet.</div>';
+        return;
+      }
+
+      listEl.innerHTML = coupons.map(c => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-family:monospace; font-size:13px; font-weight:800; background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px;">${c.code}</span>
+              <strong style="font-size:12px; color:#166534;">
+                ${c.discountPercent ? `${c.discountPercent}% OFF` : `Rs. ${c.flatDiscount} OFF`}
+              </strong>
+            </div>
+            <div style="font-size:11px; color:#64748b; margin-top:2px;">
+              ${c.description || 'General store promo'} ${c.minSpend ? `• Min Spend: Rs. ${c.minSpend}` : ''}
+            </div>
+          </div>
+          <button class="action-btn-mini danger" onclick="App.handleDeleteCoupon('${c.code}')" style="padding:4px 10px; font-size:11px;">
+            Delete
+          </button>
+        </div>
+      `).join('');
+    } catch(e) {}
+  },
+
+  async handleCreateCoupon(e) {
+    e.preventDefault();
+    const form = e.target;
+    const payload = {
+      code: form.code.value,
+      discountPercent: form.discountPercent.value ? Number(form.discountPercent.value) : undefined,
+      flatDiscount: form.flatDiscount.value ? Number(form.flatDiscount.value) : undefined,
+      minSpend: form.minSpend.value ? Number(form.minSpend.value) : 0,
+      description: form.description.value
+    };
+
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        Cart.showToast(`Coupon ${payload.code.toUpperCase()} created successfully!`);
+        form.reset();
+        await this.refreshAdminCoupons();
+      } else {
+        alert(data.message || 'Failed to create coupon');
+      }
+    } catch(err) {
+      alert('Error creating coupon.');
+    }
+  },
+
+  async handleDeleteCoupon(code) {
+    if (!confirm(`Are you sure you want to delete promo code "${code}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/coupons/${code}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        Cart.showToast(`Coupon ${code} deleted.`);
+        await this.refreshAdminCoupons();
+      } else {
+        alert(data.message || 'Failed to delete coupon');
+      }
+    } catch(e) {
+      alert('Error deleting coupon.');
+    }
+  },
+
+  // ==========================================
+  // RECENTLY VIEWED FRAMES
+  // ==========================================
+  loadRecentlyViewed() {
+    try {
+      const saved = localStorage.getItem('faboptic_recently_viewed');
+      this.recentlyViewed = saved ? JSON.parse(saved) : [];
+    } catch(e) {
+      this.recentlyViewed = [];
+    }
+  },
+
+  saveRecentlyViewed() {
+    localStorage.setItem('faboptic_recently_viewed', JSON.stringify(this.recentlyViewed));
+  },
+
+  addToRecentlyViewed(productId) {
+    if (!productId) return;
+    this.recentlyViewed = [productId, ...this.recentlyViewed.filter(id => id !== productId)].slice(0, 8);
+    this.saveRecentlyViewed();
+    this.renderRecentlyViewed();
+  },
+
+  renderRecentlyViewed() {
+    const section = document.getElementById('recently-viewed-section');
+    const container = document.getElementById('recently-viewed-container');
+    if (!section || !container) return;
+
+    if (!this.recentlyViewed.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    const recentProducts = this.recentlyViewed
+      .map(id => this.products.find(p => p.id === id))
+      .filter(Boolean);
+
+    if (!recentProducts.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    container.innerHTML = recentProducts.map(p => {
+      const img = (p.images && p.images[0]) || '/images/hero-eyewear.svg';
+      const inStock = p.inStock !== false;
+      return `
+        <div class="recently-viewed-card" style="min-width:210px; max-width:210px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; cursor:pointer;" onclick="App.openLensCustomizer('${p.id}')">
+          <img src="${img}" alt="${p.name}" style="width:100%; height:110px; object-fit:contain; background:#f8fafc; border-radius:8px; padding:6px;">
+          <div>
+            <span style="font-size:10.5px; text-transform:uppercase; color:#64748b; font-weight:700;">${p.shape}</span>
+            <h4 style="font-size:13px; font-weight:800; margin:2px 0; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h4>
+            <div style="font-size:13px; font-weight:900; color:#000;">Rs. ${p.price.toLocaleString()}</div>
+          </div>
+          <button class="action-btn-mini" style="width:100%; padding:6px; font-size:11px; font-weight:700; background:#0f172a; color:#fff;" onclick="event.stopPropagation(); App.openLensCustomizer('${p.id}')">
+            ${inStock ? 'Select Lenses' : 'Out of Stock'}
+          </button>
+        </div>
+      `;
+    }).join('');
   }
 };
 
