@@ -963,59 +963,50 @@
   ],
   "orders": [
     {
-      "orderId": "FO-725601",
-      "userId": null,
+      "orderId": "FO-872449",
+      "userId": "usr-6164",
       "customer": {
-        "fullName": "Dr. Shahzad Tariq",
-        "phone": "03241383370",
-        "email": "dr.shahzad@hospital.pk",
-        "address": "Suite 404, Doctors Medical Towers, Jail Road",
-        "city": "Lahore",
+        "fullName": "Muhammad Danial",
+        "phone": "03061160526",
+        "email": "daniyalr358@gmail.com",
+        "address": "Faisal abad, Ghulam Muhammad Abad",
+        "city": "Faisalabad",
         "notes": ""
       },
       "prescription": null,
       "items": [
         {
-          "productId": "prod_1",
-          "name": "Tokyo Minimalist Aviator",
-          "price": 8950,
-          "lensName": "Anti-Glare Blue Cut Pro",
-          "colorName": "Gold / Tortoise",
+          "key": "opt-003_frame-only_Matte Midnight",
+          "productId": "opt-003",
+          "name": "BlueShield Pro Screen Protector",
+          "price": 2950,
+          "framePrice": 2950,
+          "lensPrice": 0,
+          "lensName": "Frame Only (Demo Lenses)",
+          "colorName": "Matte Midnight",
+          "image": "/images/blueshield-pro.svg",
           "quantity": 1,
           "prescription": {
-            "note": "Doctor prescription slip uploaded by customer",
-            "prescriptionImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkWPjfDwAEeQHzE1L/0wAAAABJRU5ErkJggg==",
-            "hasUploadedSlip": true,
-            "right": {
-              "sph": "-1.50",
-              "cyl": "-0.50",
-              "axis": "90"
-            },
-            "left": {
-              "sph": "-1.75",
-              "cyl": "-0.25",
-              "axis": "85"
-            },
-            "pd": "64 mm"
+            "note": "Customer will send doctor slip via WhatsApp"
           }
         }
       ],
-      "subtotal": 8950,
+      "subtotal": 2950,
       "discount": 0,
-      "deliveryFee": 0,
-      "totalAmount": 8950,
-      "paymentMethod": "Cash on Delivery (COD)",
+      "deliveryFee": 299,
+      "totalAmount": 3249,
+      "paymentMethod": "JazzCash / EasyPaisa",
       "status": "Confirmed & Packing",
       "statusHistory": [
         {
           "status": "Confirmed & Packing",
-          "timestamp": "2026-10-29T19:00:23.616Z",
+          "timestamp": "2026-11-01T11:38:18.581Z",
           "note": "Order verified and queued for optical preparation"
         }
       ],
       "courierName": "TCS Express",
       "courierTrackingNumber": "",
-      "createdAt": "2026-10-29T19:00:23.616Z",
+      "createdAt": "2026-11-01T11:38:18.581Z",
       "estimatedDelivery": "2 to 3 Business Days via TCS"
     },
     {
@@ -1198,6 +1189,66 @@
       "totalAmount": 4950,
       "updatedAt": "2026-10-29T17:25:04.598Z",
       "userId": "usr-4517"
+    },
+    {
+      "_id": "6ae397c5f8ec5888caf47ee5",
+      "orderId": "FO-725601",
+      "__v": 0,
+      "courierName": "TCS Express",
+      "courierTrackingNumber": "",
+      "createdAt": "Fri Oct 30 2026 00:00:23 GMT+0500 (Pakistan Standard Time)",
+      "customer": {
+        "fullName": "Dr. Shahzad Tariq",
+        "phone": "03241383370",
+        "email": "dr.shahzad@hospital.pk",
+        "address": "Suite 404, Doctors Medical Towers, Jail Road",
+        "city": "Lahore",
+        "notes": ""
+      },
+      "deliveryFee": 0,
+      "discount": 0,
+      "estimatedDelivery": "2 to 3 Business Days via TCS",
+      "items": [
+        {
+          "productId": "prod_1",
+          "name": "Tokyo Minimalist Aviator",
+          "price": 8950,
+          "lensName": "Anti-Glare Blue Cut Pro",
+          "colorName": "Gold / Tortoise",
+          "quantity": 1,
+          "prescription": {
+            "note": "Doctor prescription slip uploaded by customer",
+            "prescriptionImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkWPjfDwAEeQHzE1L/0wAAAABJRU5ErkJggg==",
+            "hasUploadedSlip": true,
+            "right": {
+              "sph": "-1.50",
+              "cyl": "-0.50",
+              "axis": "90"
+            },
+            "left": {
+              "sph": "-1.75",
+              "cyl": "-0.25",
+              "axis": "85"
+            },
+            "pd": "64 mm"
+          }
+        }
+      ],
+      "paymentMethod": "Cash on Delivery (COD)",
+      "prescription": null,
+      "status": "Confirmed & Packing",
+      "statusHistory": [
+        {
+          "status": "Confirmed & Packing",
+          "timestamp": "2026-10-29T19:00:23.616Z",
+          "note": "Order verified and queued for optical preparation",
+          "_id": "6ae397c7e7bdaf54c1f813d9"
+        }
+      ],
+      "subtotal": 8950,
+      "totalAmount": 8950,
+      "updatedAt": "2026-10-29T19:00:23.623Z",
+      "userId": null
     }
   ],
   "subscribers": [
@@ -1266,9 +1317,11 @@
       "createdAt": "2026-10-29T14:31:46.164Z",
       "fullName": "Muhammad Danial",
       "id": "usr-6164",
-      "password": "R Danial09@#",
+      "password": "$2b$10$0zzGwxS9OelDcxVQjkpPsucko7XhiI.6IWRUmX.w0dnmp/2dS5/aO",
       "phone": "03061160526",
-      "role": "customer"
+      "role": "customer",
+      "address": "Faisal abad, Ghulam Muhammad Abad",
+      "city": "Faisalabad"
     },
     {
       "_id": "6ae3793ff8ec5888caf47bdc",

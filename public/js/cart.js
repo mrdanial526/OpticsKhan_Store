@@ -399,9 +399,12 @@ const Cart = {
     };
 
     try {
+      const headers = window.App && window.App.authHeaders
+        ? window.App.authHeaders({ 'Content-Type': 'application/json' })
+        : { 'Content-Type': 'application/json' };
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(orderData)
       });
       const data = await res.json();

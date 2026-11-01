@@ -2,17 +2,99 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
 const db = require('./db/database');
+const { createToken, attachUser, requireAuth, requireAdmin } = require('./lib/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_TEST = process.env.NODE_ENV === 'test';
 
-app.use(cors());
+// Behind Docker / Nginx / Render / Railway the real client IP comes from X-Forwarded-For
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
+
+// --- SECURITY MIDDLEWARE ---
+// CSP allows inline handlers because the storefront uses onclick="App.x()" attributes.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        connectSrc: ["'self'"],
+        mediaSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
+app.use(cors({ origin: process.env.CORS_ORIGIN || false }));
+app.use(compression());
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 600,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  skip: req => IS_TEST || req.path === '/live-sales-stream',
+  message: { success: false, message: 'Too many requests, please try again later.' },
+});
+// Stricter limit on login/register to slow down password guessing
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  skip: () => IS_TEST,
+  message: { success: false, message: 'Too many sign-in attempts. Please wait 15 minutes and try again.' },
+});
+app.use('/api/', apiLimiter);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: IS_TEST ? 0 : '1h' }));
+app.use('/api/', attachUser);
 
-// Simulated real-time sales pool for the Socket.IO / live-stream sales toast
+/** Returns 400 with a readable `message` (the frontend shows data.message). */
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (errors.isEmpty()) return next();
+  const list = errors.array();
+  return res.status(400).json({ success: false, message: list[0].msg, errors: list });
+};
+
+/** Hides personal details on public order tracking unless viewer is owner/admin. */
+const redactOrder = (order, viewer) => {
+  const isAdmin = viewer && viewer.role === 'admin';
+  const isOwner =
+    viewer && order.customer && order.customer.email &&
+    order.customer.email.toLowerCase() === String(viewer.email).toLowerCase();
+  if (isAdmin || isOwner) return order;
+  const phone = String((order.customer && order.customer.phone) || '');
+  const masked = phone.length > 6 ? `${phone.slice(0, 4)}****${phone.slice(-3)}` : '****';
+  const { prescription: _prescription, ...rest } = order;
+  return {
+    ...rest,
+    items: (order.items || []).map(({ prescription: _p, ...item }) => item),
+    customer: {
+      fullName: order.customer ? order.customer.fullName : '',
+      phone: masked,
+      address: 'Hidden for privacy',
+      city: order.customer ? order.customer.city : '',
+    },
+  };
+};
+
+// Simulated real-time sales pool for the live sales toast
 const recentSalesPool = [
   { customer: "Hamza K.", city: "Lahore (Gulberg)", item: "Aviator Titanium Gold", time: "Just now" },
   { customer: "Ayesha N.", city: "Islamabad (F-7)", item: "Vogue Cat-Eye Rose Noir", time: "2 mins ago" },
@@ -25,6 +107,11 @@ const recentSalesPool = [
 ];
 
 // --- REST API ENDPOINTS ---
+
+// Health check (used by Docker / uptime monitors)
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, status: 'ok', mongo: Boolean(db.mongoConnected), uptime: Math.round(process.uptime()) });
+});
 
 // 1. Get products with dynamic filtering, search & sorting
 app.get('/api/products', (req, res) => {
@@ -65,14 +152,20 @@ app.get('/api/reviews', (req, res) => {
 });
 
 // 6. Submit a review
-app.post('/api/reviews', (req, res) => {
-  const { author, city, rating, comment, productName } = req.body;
-  if (!author || !comment) {
-    return res.status(400).json({ success: false, message: "Name and comment are required." });
+app.post(
+  '/api/reviews',
+  [
+    body('author').trim().notEmpty().withMessage('Name and comment are required.').isLength({ max: 80 }),
+    body('comment').trim().notEmpty().withMessage('Name and comment are required.').isLength({ max: 2000 }),
+    body('rating').optional().isInt({ min: 1, max: 5 }).withMessage('Rating must be 1-5'),
+  ],
+  validate,
+  (req, res) => {
+    const { author, city, rating, comment, productName } = req.body;
+    const review = db.addReview({ author, city, rating, comment, productName });
+    res.status(201).json({ success: true, message: "Review posted successfully!", data: review });
   }
-  const review = db.addReview({ author, city, rating, comment, productName });
-  res.status(201).json({ success: true, message: "Review posted successfully!", data: review });
-});
+);
 
 // 7. Apply coupon code
 app.post('/api/apply-coupon', (req, res) => {
@@ -85,65 +178,80 @@ app.post('/api/apply-coupon', (req, res) => {
 });
 
 // 8. Create an order
-app.post('/api/orders', (req, res) => {
-  const { userId, fullName, phone, email, address, city, items, subtotal, discount, deliveryFee, totalAmount, paymentMethod, prescription } = req.body;
-  if (!fullName || !phone || !address || !items || !items.length) {
-    return res.status(400).json({ success: false, message: "Missing required order information." });
+app.post(
+  '/api/orders',
+  [
+    body('fullName').trim().notEmpty().withMessage('Full name required'),
+    body('phone').trim().notEmpty().withMessage('Phone required'),
+    body('address').trim().notEmpty().withMessage('Address required'),
+    body('items').isArray({ min: 1 }).withMessage('At least one item required'),
+    body('totalAmount').isFloat({ gt: 0 }).withMessage('Total amount must be positive'),
+    body('email').optional({ values: 'falsy' }).isEmail().withMessage('Invalid email address')
+  ],
+  validate,
+  (req, res) => {
+    const { fullName, phone, email, address, city, items, subtotal, discount, deliveryFee, totalAmount, paymentMethod, prescription } = req.body;
+    // Signed-in customers: trust the token, not the request body
+    const userId = req.user ? req.user.uid : req.body.userId;
+    const { order, updatedUser } = db.createOrder({
+      userId,
+      fullName,
+      phone,
+      email,
+      address,
+      city: city || "Pakistan",
+      items,
+      subtotal,
+      discount,
+      deliveryFee,
+      totalAmount,
+      paymentMethod,
+      prescription
+    });
+
+    // Prepend to recent sales so next toast can feature this actual purchase!
+    recentSalesPool.unshift({
+      customer: `${fullName.split(' ')[0]} ${fullName.split(' ')[1] ? fullName.split(' ')[1][0] + '.' : ''}`,
+      city: city || "Pakistan",
+      item: items[0]?.name || "Designer Eyewear",
+      time: "Just now"
+    });
+    if (recentSalesPool.length > 50) recentSalesPool.length = 50;
+
+    if (!IS_TEST) {
+      console.log(`\n🔔 [NEW ORDER ALERT] Order #${order.orderId} placed by ${fullName} (${phone}) - Rs. ${totalAmount}`);
+      console.log(`📦 Shipping to: ${address}, ${city || 'Pakistan'}`);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Your optical order has been confirmed!",
+      data: order,
+      updatedUser
+    });
   }
-  const { order, updatedUser } = db.createOrder({
-    userId,
-    fullName,
-    phone,
-    email,
-    address,
-    city: city || "Pakistan",
-    items,
-    subtotal,
-    discount,
-    deliveryFee,
-    totalAmount,
-    paymentMethod,
-    prescription
-  });
+);
 
-  // Prepend to recent sales so next toast can feature this actual purchase!
-  recentSalesPool.unshift({
-    customer: `${fullName.split(' ')[0]} ${fullName.split(' ')[1] ? fullName.split(' ')[1][0] + '.' : ''}`,
-    city: city || "Pakistan",
-    item: items[0]?.name || "Designer Eyewear",
-    time: "Just now"
-  });
-
-  console.log(`\n🔔 [NEW ORDER ALERT] Order #${order.orderId} placed by ${fullName} (${phone}) - Rs. ${totalAmount}`);
-  console.log(`📦 Shipping to: ${address}, ${city || 'Pakistan'}`);
-  console.log(`📧 Dispatched receipt to ${email || 'customer@faboptic.pk'}`);
-
-  res.status(201).json({
-    success: true,
-    message: "Your optical order has been confirmed!",
-    data: order,
-    updatedUser
-  });
-});
-
-// 9. Lookup order by orderId
+// 9. Lookup order by orderId (public tracking: personal details are masked)
 app.get('/api/orders/:orderId', (req, res) => {
   const order = db.getOrder(req.params.orderId);
   if (!order) {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
-  res.json({ success: true, data: order });
+  res.json({ success: true, data: redactOrder(order, req.user) });
 });
 
 // 10. Newsletter subscription
-app.post('/api/subscribe', (req, res) => {
-  const { email, phone } = req.body;
-  if (!email) {
-    return res.status(400).json({ success: false, message: "Please provide your email address." });
+app.post(
+  '/api/subscribe',
+  [body('email').trim().isEmail().withMessage('Please provide a valid email address.')],
+  validate,
+  (req, res) => {
+    const { email, phone } = req.body;
+    const result = db.addSubscriber(email, phone);
+    res.json({ success: true, message: result.message });
   }
-  const result = db.addSubscriber(email, phone);
-  res.json({ success: true, message: result.message });
-});
+);
 
 // 11. Eye Examination / Optometrist Consultation Booking
 app.post('/api/consultations', (req, res) => {
@@ -160,32 +268,63 @@ app.post('/api/consultations', (req, res) => {
 });
 
 // --- AUTHENTICATION ENDPOINTS (Customer & Owner) ---
-app.post('/api/auth/register', (req, res) => {
-  const { fullName, email, password, phone } = req.body;
-  const result = db.registerUser({ fullName, email, password, phone });
-  if (!result.success) {
-    return res.status(400).json(result);
+app.post(
+  '/api/auth/register',
+  authLimiter,
+  [
+    body('fullName').trim().notEmpty().withMessage('Full name is required'),
+    body('email').trim().isEmail().withMessage('Please enter a valid email address'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('phone')
+      .optional({ values: 'falsy' })
+      .matches(/^[+0-9\s-]{7,20}$/)
+      .withMessage('Please enter a valid phone number (e.g. 0324-1383370)')
+  ],
+  validate,
+  (req, res) => {
+    const { fullName, email, password, phone } = req.body;
+    // role is never taken from the request: new accounts are always customers
+    const result = db.registerUser({ fullName, email, password, phone });
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.status(201).json(result);
   }
-  res.status(201).json(result);
+);
+
+app.post(
+  '/api/auth/login',
+  authLimiter,
+  [
+    body('email').trim().isEmail().withMessage('Please enter a valid email address'),
+    body('password').notEmpty().withMessage('Password is required')
+  ],
+  validate,
+  (req, res) => {
+    const { email, password } = req.body;
+    const result = db.authenticateUser({ email, password });
+    if (!result.success) {
+      return res.status(401).json(result);
+    }
+    res.json({ ...result, token: createToken(result.user) });
+  }
+);
+
+// Current session (lets the frontend confirm a stored token is still valid)
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  const user = db.getUserById(req.user.uid);
+  if (!user) return res.status(401).json({ success: false, message: 'Account not found.' });
+  res.json({ success: true, user });
 });
 
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-  const result = db.authenticateUser({ email, password });
-  if (!result.success) {
-    return res.status(401).json(result);
-  }
-  res.json(result);
-});
-
-app.get('/api/auth/my-orders', (req, res) => {
-  const { email } = req.query;
-  const orders = db.getUserOrders(email);
+// Customers can only see their own orders (email comes from the signed token)
+app.get('/api/auth/my-orders', requireAuth, (req, res) => {
+  const orders = db.getUserOrders(req.user.email);
   res.json({ success: true, total: orders.length, data: orders });
 });
 
 // --- OWNER / MANAGEMENT PRODUCT MANAGEMENT (CRUD) ---
-app.post('/api/products', (req, res) => {
+app.post('/api/products', requireAdmin, (req, res) => {
   const { name, price } = req.body;
   if (!name || !price) {
     return res.status(400).json({ success: false, message: "Product name and price are required." });
@@ -194,7 +333,7 @@ app.post('/api/products', (req, res) => {
   res.status(201).json({ success: true, message: "New optical frame added to catalog!", data: product });
 });
 
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id', requireAdmin, (req, res) => {
   const updated = db.updateProduct(req.params.id, req.body);
   if (!updated) {
     return res.status(404).json({ success: false, message: "Product not found" });
@@ -202,7 +341,7 @@ app.put('/api/products/:id', (req, res) => {
   res.json({ success: true, message: "Product updated successfully!", data: updated });
 });
 
-app.patch('/api/products/:id/stock', (req, res) => {
+app.patch('/api/products/:id/stock', requireAdmin, (req, res) => {
   const product = db.toggleProductStock(req.params.id);
   if (!product) {
     return res.status(404).json({ success: false, message: "Product not found" });
@@ -210,7 +349,7 @@ app.patch('/api/products/:id/stock', (req, res) => {
   res.json({ success: true, message: `Product is now ${product.inStock ? 'In Stock' : 'Out of Stock'}`, data: product });
 });
 
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', requireAdmin, (req, res) => {
   const deleted = db.deleteProduct(req.params.id);
   if (!deleted) {
     return res.status(404).json({ success: false, message: "Product not found" });
@@ -218,7 +357,9 @@ app.delete('/api/products/:id', (req, res) => {
   res.json({ success: true, message: "Product removed from catalog" });
 });
 
-// --- OWNER ATELIER STATS & FULFILLMENT ---
+// --- OWNER ATELIER STATS & FULFILLMENT (all /api/admin/* routes are owner-only) ---
+app.use('/api/admin', requireAdmin);
+
 app.get('/api/admin/stats', (req, res) => {
   const stats = db.getAdminStats();
   res.json({ success: true, data: stats });
@@ -282,7 +423,7 @@ app.get('/api/live-sales-stream', (req, res) => {
   const initialSale = recentSalesPool[Math.floor(Math.random() * recentSalesPool.length)];
   res.write(`data: ${JSON.stringify(initialSale)}\n\n`);
 
-  // Stream subsequent real-time sales alerts periodically (mimics Socket.IO real-time alerts)
+  // Stream subsequent real-time sales alerts periodically
   const interval = setInterval(() => {
     const sale = recentSalesPool[Math.floor(Math.random() * recentSalesPool.length)];
     res.write(`data: ${JSON.stringify(sale)}\n\n`);
@@ -294,14 +435,57 @@ app.get('/api/live-sales-stream', (req, res) => {
   });
 });
 
+// Unknown API routes return JSON 404 instead of the HTML page
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, message: 'API endpoint not found' });
+});
+
 // Fallback to SPA index.html (Express 5 compatible)
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`👓 FabOptic Store Server Running at: http://localhost:${PORT}`);
-  console.log(`🚀 REST API & Real-time Sales Alerts active`);
-  console.log(`===============================================`);
+// JSON error handler (bad JSON, payload too large, unexpected errors)
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) console.error('Server error:', err);
+  res.status(status).json({
+    success: false,
+    message: status === 413 ? 'Upload too large (max 10MB).' : status >= 500 ? 'Something went wrong. Please try again.' : err.message,
+  });
 });
+
+// Owner password: set ADMIN_PASSWORD in .env to replace the default demo password
+db.applyOwnerPassword(process.env.ADMIN_PASSWORD);
+
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(`👓 FabOptic Store Server Running at: http://localhost:${PORT}`);
+    console.log(`🚀 REST API & Real-time Sales Alerts active`);
+    console.log(`===============================================`);
+  });
+
+  // Graceful shutdown: close HTTP server + MongoDB cleanly on SIGTERM/SIGINT
+  const shutdown = (signal) => {
+    console.log(`\n🛑 ${signal} received — shutting down gracefully...`);
+    server.close(async () => {
+      try {
+        const mongoose = require('mongoose');
+        if (mongoose.connection.readyState === 1) {
+          await mongoose.disconnect();
+          console.log('✓ MongoDB disconnected.');
+        }
+      } catch { /* ignore */ }
+      console.log('✓ Server closed. Goodbye!');
+      process.exit(0);
+    });
+    // Force exit after 10s if connections don't close
+    setTimeout(() => process.exit(1), 10_000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+module.exports = app;

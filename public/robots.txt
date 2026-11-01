@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block API and admin paths from search engines
+Disallow: /api/
+Disallow: /admin
+
+Sitemap: https://faboptic.pk/sitemap.xml

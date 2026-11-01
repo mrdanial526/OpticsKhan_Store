@@ -3,7 +3,8 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
-const DB_FILE = path.join(__dirname, 'data.json');
+// DB_FILE can be overridden (tests use a temporary file so real data is never touched)
+const DB_FILE = process.env.DB_FILE || (process.env.VERCEL ? path.join('/tmp', 'data.json') : path.join(__dirname, 'data.json'));
 
 // Mongoose Models for MongoDB Atlas Cloud
 const ProductSchema = new mongoose.Schema({
@@ -592,6 +593,7 @@ class Database {
 
   async initMongo() {
     const uri = process.env.MONGODB_URI;
+    if (process.env.NODE_ENV === 'test') return; // never touch the live database from tests
     if (!uri || uri.includes('<db_password>')) return;
     try {
       if (mongoose.connection.readyState === 0) {
@@ -655,8 +657,11 @@ class Database {
   load() {
     let data;
     try {
-      if (fs.existsSync(DB_FILE)) {
-        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+      const sourceFile = fs.existsSync(DB_FILE)
+        ? DB_FILE
+        : path.join(__dirname, 'data.json');
+      if (fs.existsSync(sourceFile)) {
+        const raw = fs.readFileSync(sourceFile, 'utf-8');
         const parsed = JSON.parse(raw);
         data = { ...initialSeed, ...parsed };
       }
@@ -999,6 +1004,35 @@ class Database {
 
     const { password: _, ...userSafe } = user;
     return { success: true, user: userSafe };
+  }
+
+  /**
+   * Sets the owner (admin) password from ADMIN_PASSWORD so the public demo
+   * password "admin" stops working. No-op if the password is already current.
+   */
+  applyOwnerPassword(newPassword) {
+    const admins = (this.data.users || []).filter(u => u.role === 'admin');
+    if (!newPassword) {
+      const usesDefault = admins.some(u =>
+        u.password === 'admin' ||
+        (typeof u.password === 'string' && u.password.startsWith('$2') && bcrypt.compareSync('admin', u.password))
+      );
+      if (usesDefault && process.env.NODE_ENV !== 'test') {
+        console.warn('⚠️  SECURITY: Owner account still uses the default password "admin". Set ADMIN_PASSWORD in .env.');
+      }
+      return false;
+    }
+    let changed = false;
+    for (const admin of admins) {
+      const isHash = typeof admin.password === 'string' && admin.password.startsWith('$2');
+      const alreadySet = isHash ? bcrypt.compareSync(newPassword, admin.password) : admin.password === newPassword;
+      if (alreadySet && isHash) continue;
+      admin.password = bcrypt.hashSync(newPassword, 10);
+      this.syncToMongo('user', { email: admin.email }, admin);
+      changed = true;
+    }
+    if (changed) this.save();
+    return changed;
   }
 
   getUserById(id) {
