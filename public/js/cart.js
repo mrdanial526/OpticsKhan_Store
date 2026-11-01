@@ -305,7 +305,7 @@ const Cart = {
 
     const modal = document.getElementById('checkout-modal');
     if (!modal) return;
-    
+
     // 2. Pre-fill customer details from verified session
     const form = document.getElementById('checkout-order-form');
     if (form && window.App.currentUser) {
@@ -493,7 +493,7 @@ const Cart = {
     document.getElementById('confirmed-customer-name').textContent = order.customer.fullName;
     document.getElementById('confirmed-total-price').textContent = `Rs. ${order.totalAmount.toLocaleString()}`;
     document.getElementById('confirmed-address').textContent = `${order.customer.address}, ${order.customer.city}`;
-    
+
     const paymentEl = document.getElementById('confirmed-payment-method');
     if (paymentEl) paymentEl.textContent = order.paymentMethod || 'Cash on Delivery (COD)';
 

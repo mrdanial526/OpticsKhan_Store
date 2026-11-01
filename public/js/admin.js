@@ -655,7 +655,7 @@ Object.assign(App, {
           <div>
             <div style="font-family:var(--font-display, serif); font-size:22px; font-weight:900; letter-spacing:0.5px; color:#0f172a;">FABOPTIC CO.</div>
             <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#475569; font-weight:700;">Luxury Eyewear Atelier & Precision Optical Lab</div>
-            <div style="font-size:11px; color:#64748b; margin-top:2px;">Lahore, Pakistan • WhatsApp: +92 324 1383370 • support@faboptic.pk</div>
+            <div style="font-size:11px; color:#64748b; margin-top:2px;">Lahore, Pakistan • WhatsApp: +92 324 1383370 • rdanial795@gmail.com</div>
           </div>
           <div style="text-align:right;">
             <div style="background:#0f172a; color:#fff; font-size:11px; font-weight:900; padding:4px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; display:inline-block;">
@@ -753,7 +753,7 @@ Object.assign(App, {
 
         <!-- Optical Guarantee Disclaimer -->
         <div style="background:#f8fafc; border-top:1px dashed #cbd5e1; padding:12px 14px; border-radius:6px; font-size:10.5px; color:#64748b; line-height:1.4;">
-          <strong>FabOptic 7-Day Optical Guarantee:</strong> If lenses need power calibration or fit adjustment, exchange within 7 days. Inspect flyer seal upon delivery. For queries, WhatsApp 0324-1383370 or email support@faboptic.pk.
+          <strong>FabOptic 7-Day Optical Guarantee:</strong> If lenses need power calibration or fit adjustment, exchange within 7 days. Inspect flyer seal upon delivery. For queries, WhatsApp 0324-1383370 or email rdanial795@gmail.com.
         </div>
       `;
 
