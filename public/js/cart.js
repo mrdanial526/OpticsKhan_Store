@@ -352,9 +352,41 @@ const Cart = {
     if (summaryEl) {
       summaryEl.textContent = `Rs. ${total.toLocaleString()}`;
     }
+    const walletAmt = document.getElementById('wallet-transfer-amount');
+    if (walletAmt) {
+      walletAmt.textContent = `Rs. ${total.toLocaleString()}`;
+    }
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+  },
+
+  onPaymentMethodChange(val) {
+    const walletBox = document.getElementById('wallet-payment-box');
+    const submitBtn = document.getElementById('checkout-submit-btn');
+    const walletTitle = document.getElementById('wallet-title');
+    const walletTypeDisplay = document.getElementById('wallet-type-display');
+    const total = this.getTotal().toLocaleString();
+
+    if (val && !val.includes('Cash on Delivery')) {
+      if (walletBox) walletBox.style.display = 'block';
+      const isJazz = val.includes('JazzCash');
+      const isBank = val.includes('Bank');
+      if (walletTitle) {
+        walletTitle.textContent = isBank ? 'Direct Bank Transfer Instructions' : (isJazz ? 'JazzCash Transfer Instructions' : 'EasyPaisa Transfer Instructions');
+      }
+      if (walletTypeDisplay) {
+        walletTypeDisplay.textContent = isBank ? 'Meezan Bank / Bank Alfalah' : (isJazz ? 'JazzCash Mobile Account' : 'EasyPaisa Mobile Account');
+      }
+      const amtEl = document.getElementById('wallet-transfer-amount');
+      if (amtEl) amtEl.textContent = `Rs. ${total}`;
+      if (submitBtn) {
+        submitBtn.textContent = `Confirm Order (${isBank ? 'Direct Bank Transfer' : (isJazz ? 'Paid via JazzCash' : 'Paid via EasyPaisa')})`;
+      }
+    } else {
+      if (walletBox) walletBox.style.display = 'none';
+      if (submitBtn) submitBtn.textContent = 'Confirm Order (Cash on Delivery)';
+    }
   },
 
   closeCheckoutModal() {
@@ -380,6 +412,16 @@ const Cart = {
 
     const form = e.target;
     const submitBtn = form.querySelector('button[type="submit"]');
+    const paymentMethod = form.paymentMethod.value;
+    const tidInput = form.querySelector('[name="transactionId"]');
+    const transactionId = tidInput ? tidInput.value.trim() : '';
+
+    if (!paymentMethod.includes('Cash on Delivery') && !transactionId) {
+      alert('Please enter your JazzCash/EasyPaisa Transaction ID (TID) or sender account reference number so we can verify your payment.');
+      if (tidInput) tidInput.focus();
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Processing Optical Order...';
 
@@ -390,7 +432,8 @@ const Cart = {
       email: form.email.value || window.App.currentUser.email || 'customer@faboptic.pk',
       address: form.address.value,
       city: form.city.value,
-      paymentMethod: form.paymentMethod.value,
+      paymentMethod,
+      transactionId,
       subtotal: this.getSubtotal(),
       discount: this.getDiscount(),
       deliveryFee: this.getShipping(),
@@ -451,6 +494,25 @@ const Cart = {
     document.getElementById('confirmed-total-price').textContent = `Rs. ${order.totalAmount.toLocaleString()}`;
     document.getElementById('confirmed-address').textContent = `${order.customer.address}, ${order.customer.city}`;
     
+    const paymentEl = document.getElementById('confirmed-payment-method');
+    if (paymentEl) paymentEl.textContent = order.paymentMethod || 'Cash on Delivery (COD)';
+
+    const tidRow = document.getElementById('confirmed-tid-row');
+    const tidVal = document.getElementById('confirmed-tid-value');
+    const walletNotice = document.getElementById('confirmed-wallet-notice');
+    const isWallet = order.paymentMethod && !order.paymentMethod.includes('Cash on Delivery');
+
+    if (order.transactionId && tidRow && tidVal) {
+      tidRow.style.display = 'block';
+      tidVal.textContent = order.transactionId;
+    } else if (tidRow) {
+      tidRow.style.display = 'none';
+    }
+
+    if (walletNotice) {
+      walletNotice.style.display = isWallet ? 'block' : 'none';
+    }
+
     const emailNotice = document.getElementById('confirmed-email-notice');
     if (emailNotice) {
       emailNotice.textContent = order.customer.email || 'customer@faboptic.pk';
@@ -461,16 +523,25 @@ const Cart = {
     if (waBtn) {
       const itemsList = (order.items || []).map(i => `• ${i.name} (x${i.quantity || 1}) - Rs. ${(i.price || 0).toLocaleString()}`).join('\n');
       const text = encodeURIComponent(
-        `👓 *NEW ORDER CONFIRMATION - FABOPTIC PAKISTAN*\n\n` +
+        `👓 *${isWallet ? 'NEW ORDER - ADVANCE PAYMENT PROOF' : 'NEW ORDER CONFIRMATION'} - FABOPTIC PAKISTAN*\n\n` +
         `*Order ID:* #${order.orderId}\n` +
         `*Customer:* ${order.customer.fullName}\n` +
         `*Contact:* ${order.customer.phone}\n` +
+        `*Payment Method:* ${order.paymentMethod}\n` +
+        (order.transactionId ? `*Transaction ID (TID):* ${order.transactionId}\n` : '') +
         `*Shipping Address:* ${order.customer.address}, ${order.customer.city}\n\n` +
         `*Items Ordered:*\n${itemsList}\n\n` +
-        `*Total Payable:* Rs. ${order.totalAmount.toLocaleString()} (${order.paymentMethod})\n\n` +
-        `Please confirm my optical order dispatch!`
+        `*Total Payable:* Rs. ${order.totalAmount.toLocaleString()}\n\n` +
+        (isWallet
+          ? `I have sent the payment via ${order.paymentMethod} (TID: ${order.transactionId || 'Attached'}). Please find attached my payment screenshot for express dispatch!`
+          : `Please confirm my optical order dispatch!`)
       );
       waBtn.href = `https://wa.me/923241383370?text=${text}`;
+      if (isWallet) {
+        waBtn.innerHTML = `<span>💬 Send Payment Screenshot on WhatsApp (0324-1383370)</span>`;
+      } else {
+        waBtn.innerHTML = `<span>💬 Track / Confirm on WhatsApp</span>`;
+      }
     }
 
     modal.classList.add('open');

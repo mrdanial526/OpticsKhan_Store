@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const db = require('./db/database');
 const { createToken, attachUser, requireAuth, requireAdmin } = require('./lib/auth');
+const { sendOrderNotifications } = require('./lib/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -190,7 +191,7 @@ app.post(
   ],
   validate,
   (req, res) => {
-    const { fullName, phone, email, address, city, items, subtotal, discount, deliveryFee, totalAmount, paymentMethod, prescription } = req.body;
+    const { fullName, phone, email, address, city, items, subtotal, discount, deliveryFee, totalAmount, paymentMethod, transactionId, prescription } = req.body;
     // Signed-in customers: trust the token, not the request body
     const userId = req.user ? req.user.uid : req.body.userId;
     const { order, updatedUser } = db.createOrder({
@@ -206,7 +207,13 @@ app.post(
       deliveryFee,
       totalAmount,
       paymentMethod,
+      transactionId,
       prescription
+    });
+
+    // Send automated email receipts / instant alerts to store admin & buyer
+    sendOrderNotifications(order).catch(err => {
+      if (!IS_TEST) console.warn('Order notification dispatch warning:', err.message);
     });
 
     // Prepend to recent sales so next toast can feature this actual purchase!

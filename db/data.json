@@ -963,6 +963,46 @@
   ],
   "orders": [
     {
+      "orderId": "FO-558066",
+      "userId": null,
+      "customer": {
+        "fullName": "Kamran Akmal",
+        "phone": "03001234567",
+        "email": "kamran@example.com",
+        "address": "Model Town Block C",
+        "city": "Lahore",
+        "notes": ""
+      },
+      "prescription": null,
+      "items": [
+        {
+          "id": "opt-001",
+          "name": "Aviator Titanium Gold",
+          "price": 4950,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 4950,
+      "discount": 0,
+      "deliveryFee": 0,
+      "totalAmount": 4950,
+      "paymentMethod": "JazzCash Mobile Account",
+      "transactionId": "JC-8822991100",
+      "paymentStatus": "Paid (Awaiting Verification)",
+      "status": "Confirmed & Packing",
+      "statusHistory": [
+        {
+          "status": "Confirmed & Packing",
+          "timestamp": "2026-11-01T11:55:24.329Z",
+          "note": "Order verified and queued for optical preparation"
+        }
+      ],
+      "courierName": "TCS Express",
+      "courierTrackingNumber": "",
+      "createdAt": "2026-11-01T11:55:24.329Z",
+      "estimatedDelivery": "2 to 3 Business Days via TCS"
+    },
+    {
       "orderId": "FO-872449",
       "userId": "usr-6164",
       "customer": {
@@ -1284,7 +1324,7 @@
       "createdAt": "2026-10-29T13:16:59.047Z",
       "fullName": "Atelier Owner",
       "id": "usr-admin",
-      "password": "$2b$10$wO8jfpYPbt1WlOLZqyZlXOQQzOknbJGXqO8wjabwCYYn900ThqU8K",
+      "password": "$2b$10$M/rt4R6HD/3vAu0v5xTEW.eKfrDFh/bDbCKkO4P08rYuDcDFtopde",
       "phone": "03241383370",
       "role": "admin"
     },

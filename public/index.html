@@ -788,11 +788,36 @@
 
           <div class="form-group">
             <label>Payment Method</label>
-            <select name="paymentMethod" class="form-input">
+            <select name="paymentMethod" id="checkout-payment-method" class="form-input" onchange="Cart.onPaymentMethodChange(this.value)">
               <option value="Cash on Delivery (COD)">Cash on Delivery (COD) 🇵🇰</option>
-              <option value="JazzCash / EasyPaisa">JazzCash / EasyPaisa Transfer</option>
-              <option value="Bank Transfer">Direct Bank Transfer</option>
+              <option value="JazzCash Mobile Account">JazzCash Mobile Account 📱</option>
+              <option value="EasyPaisa Mobile Account">EasyPaisa Mobile Account 📱</option>
+              <option value="Direct Bank Transfer">Direct Bank Transfer 🏦</option>
             </select>
+          </div>
+
+          <!-- Dynamic Mobile Wallet / Bank Transfer Instructions Box -->
+          <div id="wallet-payment-box" style="display:none; background:#fefce8; border:1px solid #fde047; padding:14px; border-radius:12px; margin-bottom:12px;">
+            <div style="font-weight:700; color:#854d0e; font-size:13px; display:flex; align-items:center; gap:6px;">
+              <span id="wallet-icon">📱</span>
+              <span id="wallet-title">Mobile Account Transfer Instructions</span>
+            </div>
+            <div style="margin-top:8px; font-size:12.5px; color:#713f12; line-height:1.6;">
+              Please transfer <strong id="wallet-transfer-amount" style="color:#b45309;">Rs. 0</strong> to our official store account:<br>
+              • Account Type: <strong id="wallet-type-display">JazzCash Account</strong><br>
+              • Account Title: <strong>FabOptic Eyewear</strong><br>
+              • Account / Mobile Number: <strong id="wallet-account-number" style="font-size:14px; color:#0f172a; font-family:monospace; background:#fef08a; padding:1px 6px; border-radius:4px;">0324-1383370</strong>
+              <button type="button" onclick="navigator.clipboard?.writeText('03241383370'); Cart.showToast('Account number 0324-1383370 copied!');" style="margin-left:6px; background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:11px; cursor:pointer; font-weight:700;">Copy</button>
+            </div>
+            <div style="margin-top:12px;">
+              <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                Transaction ID (TID) / Sender Reference *
+              </label>
+              <input type="text" id="wallet-tid-input" name="transactionId" placeholder="e.g. TID 8492049281 or sender mobile number" class="form-input" style="background:#fff; border-color:#cbd5e1; font-weight:600;">
+              <span style="font-size:11px; color:#a16207; display:block; margin-top:4px;">
+                💡 Send the payment screenshot to our WhatsApp (<a href="https://wa.me/923241383370" target="_blank" style="color:#0284c7; font-weight:700;">0324-1383370</a>) after placing your order for instant verification & express packing.
+              </span>
+            </div>
           </div>
 
           <!-- Checkout Order Cost Breakdown -->
@@ -816,10 +841,10 @@
           </div>
 
           <div style="font-size:11.5px; color:var(--color-gray-500); display:flex; align-items:center; gap:6px;">
-            <span>🛡️ 7-Day Fit Guarantee • Inspect package upon delivery • Cash on Delivery</span>
+            <span>🛡️ 7-Day Fit Guarantee • Inspect package upon delivery • 100% Genuine Eyewear</span>
           </div>
 
-          <button type="submit" class="primary-btn" style="width:100%; padding:14px; font-size:14px; font-weight:800;">
+          <button type="submit" id="checkout-submit-btn" class="primary-btn" style="width:100%; padding:14px; font-size:14px; font-weight:800;">
             Confirm Order (Cash on Delivery)
           </button>
         </form>
@@ -840,12 +865,18 @@
         </p>
         <div style="background:var(--color-gray-100); padding:16px; border-radius:12px; width:100%; text-align:left; font-size:13px; display:flex; flex-direction:column; gap:6px;">
           <div>Tracking Order ID: <strong id="confirmed-order-id" style="color:var(--color-black); font-size:15px;">FO-123456</strong></div>
+          <div>Payment Method: <strong id="confirmed-payment-method" style="color:#0f172a;">Cash on Delivery (COD)</strong></div>
+          <div id="confirmed-tid-row" style="display:none;">Transaction Reference: <strong id="confirmed-tid-value" style="font-family:monospace; background:#fef08a; padding:1px 6px; border-radius:4px; color:#854d0e;">N/A</strong></div>
           <div>Total Amount: <strong id="confirmed-total-price">Rs. 4,950</strong></div>
           <div>Delivery Address: <span id="confirmed-address">Lahore, Pakistan</span></div>
           <div>Estimated Delivery: <strong>2 to 3 Business Days via TCS/Trax</strong></div>
           <div style="border-top:1px dashed var(--color-gray-300); padding-top:6px; margin-top:2px; font-size:12px; color:var(--color-gray-600);">
             📧 Receipt & dispatch updates sent to: <strong id="confirmed-email-notice">your email</strong>
           </div>
+        </div>
+
+        <div id="confirmed-wallet-notice" style="display:none; background:#fefce8; border:1px solid #fde047; padding:10px 14px; border-radius:10px; font-size:12px; color:#854d0e; text-align:left; width:100%;">
+          <strong>📱 Advance Payment Verification:</strong> Please click the WhatsApp button below to send your transfer screenshot to our team for immediate payment clearance & express priority dispatch.
         </div>
         <div style="display:flex; flex-direction:column; gap:10px; width:100%; margin-top:8px;">
           <a id="whatsapp-track-btn" href="https://wa.me/923241383370" target="_blank" class="primary-btn" style="background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;">

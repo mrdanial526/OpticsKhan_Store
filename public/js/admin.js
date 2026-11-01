@@ -557,7 +557,16 @@ Object.assign(App, {
           </td>
           <td>${o.customer.city}</td>
           <td><strong>Rs. ${o.totalAmount.toLocaleString()}</strong></td>
-          <td><span style="font-size:11px; font-weight:700;">${o.paymentMethod}</span></td>
+          <td>
+            <span style="font-size:11px; font-weight:700; ${o.transactionId ? 'color:#854d0e; background:#fef3c7; padding:2px 6px; border-radius:4px; display:inline-block;' : ''}">
+              ${o.paymentMethod || 'COD'}
+            </span>
+            ${o.transactionId ? `
+              <div style="font-size:10.5px; font-family:monospace; color:#92400e; font-weight:800; margin-top:3px; background:#fff; padding:2px 4px; border:1px solid #fde047; border-radius:4px;">
+                TID: ${o.transactionId}
+              </div>
+            ` : ''}
+          </td>
           <td>
             <span style="background:#f0fdf4; color:#166534; font-size:11px; font-weight:800; padding:3px 8px; border-radius:99px;">
               ${o.status}
@@ -671,11 +680,12 @@ Object.assign(App, {
           <div style="display:flex; flex-direction:column; gap:8px;">
             <div style="background:${isCOD ? '#fef2f2' : '#f0fdf4'}; border:1.5px solid ${isCOD ? '#f87171' : '#86efac'}; border-radius:8px; padding:10px 12px; text-align:center;">
               <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:800; color:${isCOD ? '#991b1b' : '#166534'};">
-                ${isCOD ? 'CASH ON DELIVERY (COLLECT FROM CUSTOMER)' : 'PAYMENT CONFIRMED / PREPAID'}
+                ${isCOD ? 'CASH ON DELIVERY (COLLECT FROM CUSTOMER)' : 'PAYMENT PREPAID (' + (order.paymentMethod || 'ONLINE') + ')'}
               </div>
               <div style="font-size:22px; font-weight:900; color:${isCOD ? '#dc2626' : '#15803d'}; font-family:var(--font-display, sans-serif); margin-top:2px;">
                 Rs. ${order.totalAmount.toLocaleString()}
               </div>
+              ${order.transactionId ? `<div style="font-size:11px; font-family:monospace; color:#854d0e; font-weight:800; margin-top:2px;">TID: ${order.transactionId}</div>` : ''}
             </div>
 
             <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:8px 12px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center;">

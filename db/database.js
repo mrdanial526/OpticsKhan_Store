@@ -51,6 +51,8 @@ const OrderSchema = new mongoose.Schema({
   discount: Number,
   totalAmount: Number,
   paymentMethod: String,
+  transactionId: String,
+  paymentStatus: String,
   status: String,
   statusHistory: [{ status: String, timestamp: String, note: String }],
   courierName: String,
@@ -890,6 +892,10 @@ class Database {
       deliveryFee: orderPayload.deliveryFee || 0,
       totalAmount: orderPayload.totalAmount || 0,
       paymentMethod: orderPayload.paymentMethod || "Cash on Delivery (COD)",
+      transactionId: orderPayload.transactionId || "",
+      paymentStatus: (orderPayload.paymentMethod && orderPayload.paymentMethod.toLowerCase().includes('cash on delivery'))
+        ? "Pending COD Collection"
+        : (orderPayload.transactionId ? "Paid (Awaiting Verification)" : "Pending Payment"),
       status: "Confirmed & Packing",
       statusHistory: [
         {
