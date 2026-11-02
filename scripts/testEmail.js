@@ -15,10 +15,10 @@ transporter.verify((err, success) => {
   } else {
     console.log('✓ SMTP Connection successfully verified with Gmail server!');
     transporter.sendMail({
-      from: '"FabOptic Eyewear" <' + process.env.SMTP_USER + '>',
+      from: '"OpticsKhan Eyewear" <' + process.env.SMTP_USER + '>',
       to: process.env.ADMIN_EMAIL,
-      subject: '👓 FabOptic Store Order Alerts Configured Successfully!',
-      html: '<h2>Congratulations!</h2><p>Your Gmail notification system is active. You will receive an instant itemized email alert whenever a customer places an order on your FabOptic store (COD, JazzCash, EasyPaisa).</p><p>Store Helpline: 0324-1383370</p>'
+      subject: '👓 OpticsKhan Store Order Alerts Configured Successfully!',
+      html: '<h2>Congratulations!</h2><p>Your Gmail notification system is active. You will receive an instant itemized email alert whenever a customer places an order on your OpticsKhan store via Cash on Delivery.</p><p>Store Helpline: 0324-1383370</p>'
     }, (sendErr, info) => {
       if (sendErr) {
         console.error('❌ Failed to send test email:', sendErr.message);
@@ -30,3 +30,4 @@ transporter.verify((err, success) => {
     });
   }
 });
+

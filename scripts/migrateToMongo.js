@@ -11,7 +11,7 @@ if (!uri || uri.includes('<db_password>')) {
   process.exit(1);
 }
 
-// Define schemas for FabOptic
+// Define schemas for OpticsKhan
 const ProductSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -75,7 +75,7 @@ const Consultation = mongoose.models.Consultation || mongoose.model('Consultatio
 
 async function runMigration() {
   console.log('===========================================================');
-  console.log('🚀 MIGRATING FABOPTIC TO MONGODB ATLAS CLOUD...');
+  console.log('🚀 MIGRATING OPTICSKHAN TO MONGODB ATLAS CLOUD...');
   console.log('===========================================================');
   console.log('Connecting to MongoDB Atlas...');
 

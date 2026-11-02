@@ -1,0 +1,13 @@
+<svg width="240" height="50" viewBox="0 0 240 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(4, 6)">
+    <circle cx="16" cy="19" r="14" stroke="#000" stroke-width="3.5" fill="none"/>
+    <circle cx="48" cy="19" r="14" stroke="#000" stroke-width="3.5" fill="none"/>
+    <path d="M30 15 Q32 12 34 15" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M2 19 H0 M62 19 H64" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+    <path d="M9 13 Q16 11 20 18" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M41 13 Q48 11 52 18" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <circle cx="32" cy="14" r="2" fill="#D4AF37"/>
+  </g>
+  <text x="74" y="27" font-family="'Integral CF', 'Montserrat', 'Inter', sans-serif" font-weight="900" font-size="20" letter-spacing="1" fill="#000">OPTICS<tspan fill="#D4AF37">KHAN</tspan></text>
+  <text x="75" y="39" font-family="'Inter', sans-serif" font-weight="600" font-size="8" letter-spacing="3" fill="#666">HAUTE OPTICAL ATELIER</text>
+</svg>

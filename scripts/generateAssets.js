@@ -27,7 +27,7 @@ saveSvg('logo.svg', `
     <circle cx="32" cy="14" r="2" fill="#D4AF37"/>
   </g>
   <!-- Wordmark -->
-  <text x="74" y="27" font-family="'Integral CF', 'Montserrat', 'Inter', sans-serif" font-weight="900" font-size="22" letter-spacing="1" fill="#000">FAB<tspan fill="#D4AF37">OPTIC</tspan></text>
+  <text x="74" y="27" font-family="'Integral CF', 'Montserrat', 'Inter', sans-serif" font-weight="900" font-size="20" letter-spacing="1" fill="#000">OPTICS<tspan fill="#D4AF37">KHAN</tspan></text>
   <text x="75" y="39" font-family="'Inter', sans-serif" font-weight="600" font-size="8" letter-spacing="3" fill="#666">HAUTE OPTICAL ATELIER</text>
 </svg>
 `);
@@ -569,7 +569,7 @@ saveSvg('lens-care-kit.svg', `
     <rect x="120" y="160" width="230" height="120" rx="20" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
     <path d="M120 200 C200 215 270 215 350 200" stroke="#27272a" stroke-width="3"/>
     <circle cx="235" cy="205" r="7" fill="#D4AF37"/>
-    <text x="235" y="250" text-anchor="middle" font-family="'Syne', sans-serif" font-size="12" font-weight="800" fill="#D4AF37" letter-spacing="1">FABOPTIC ATELIER</text>
+    <text x="235" y="250" text-anchor="middle" font-family="'Syne', sans-serif" font-size="12" font-weight="800" fill="#D4AF37" letter-spacing="1">OPTICSKHAN</text>
 
     <!-- Anti-Fog Spray Bottle -->
     <rect x="390" y="140" width="60" height="130" rx="10" fill="#0284c7"/>

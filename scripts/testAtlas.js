@@ -8,7 +8,7 @@ async function testAtlas() {
 
   const db = mongoose.connection.db;
   const collections = await db.listCollections().toArray();
-  console.log('\nFound Collections in "faboptic" database:');
+  console.log('\nFound Collections in "opticskhan" database:');
   collections.forEach(c => console.log(' - ' + c.name));
 
   const productsCount = await db.collection('products').countDocuments();

@@ -106,7 +106,7 @@ Object.assign(App, {
       });
       const data = await res.json();
       if (data.success) {
-        Cart.showToast("🎉 Subscribed! Use promo code FABOPTIC10 for 10% OFF!");
+        Cart.showToast("🎉 Subscribed! Use promo code OPTICSKHAN10 for 10% OFF!");
         form.reset();
       }
     } catch (err) {

@@ -5,9 +5,14 @@ Object.assign(App, {
   // ==========================================
   // RECENTLY VIEWED FRAMES
   // ==========================================
+  getRecentlyViewedKey() {
+    return this.getStorageKey ? this.getStorageKey('opticskhan_recently_viewed') : 'opticskhan_recently_viewed';
+  },
+
   loadRecentlyViewed() {
     try {
-      const saved = localStorage.getItem('faboptic_recently_viewed');
+      const key = this.getRecentlyViewedKey();
+      const saved = localStorage.getItem(key) || (key.endsWith('_guest') ? localStorage.getItem('opticskhan_recently_viewed') : null);
       this.recentlyViewed = saved ? JSON.parse(saved) : [];
     } catch(e) {
       this.recentlyViewed = [];
@@ -15,7 +20,7 @@ Object.assign(App, {
   },
 
   saveRecentlyViewed() {
-    localStorage.setItem('faboptic_recently_viewed', JSON.stringify(this.recentlyViewed));
+    localStorage.setItem(this.getRecentlyViewedKey(), JSON.stringify(this.recentlyViewed));
   },
 
   addToRecentlyViewed(productId) {

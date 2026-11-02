@@ -89,7 +89,7 @@ async function runTest() {
   console.log('====================================================');
 
   // 1. Create a customer
-  const testEmail = `shopper_${Date.now()}@faboptic.pk`;
+  const testEmail = `shopper_${Date.now()}@opticskhan.pk`;
   console.log('\n[1] Registering customer:', testEmail);
   const reg = await postJson('/api/auth/register', {
     fullName: 'Ali Raza',

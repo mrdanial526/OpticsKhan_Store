@@ -566,31 +566,72 @@ const initialSeed = {
     }
   ],
   coupons: [
-    { code: "FABOPTIC10", discountPercent: 10, minSpend: 2500, description: "10% off on your entire optical order" },
+    { code: "OPTICSKHAN10", discountPercent: 10, minSpend: 2500, description: "10% off on your entire optical order" },
     { code: "FIRSTLOOK", discountPercent: 15, minSpend: 3500, description: "15% off for first-time customers" },
     { code: "FREESHIP", discountPercent: 0, freeShipping: true, description: "Free express delivery across Pakistan" }
   ],
   orders: [],
   subscribers: [],
   consultations: [],
-  users: [
-    {
-      id: "usr-admin",
-      fullName: "Atelier Owner",
-      email: "owner@faboptic.pk",
-      password: "admin",
-      phone: "03241383370",
-      role: "admin",
-      createdAt: new Date().toISOString()
-    }
-  ]
+  users: []
 };
 
 class Database {
   constructor() {
     this.data = this.load();
     this.mongoConnected = false;
+    this.ensureAdminSeed();
     this.initMongo();
+  }
+
+  ensureAdminSeed() {
+    if (!this.data.users) this.data.users = [];
+
+    const configuredEmail = (process.env.ADMIN_LOGIN_EMAIL || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+    const configuredPassword = (process.env.ADMIN_LOGIN_PASSWORD || process.env.ADMIN_PASSWORD || '').trim();
+    const legacyAdminPattern = /owner@opticskhan\.pk|admin@opticskhan\.pk|@localhost$/i;
+
+    this.data.users = this.data.users.filter(user => {
+      if (user.role !== 'admin') return true;
+      const isLegacy = !user.email || legacyAdminPattern.test(user.email) || user.password === 'admin';
+      return !isLegacy;
+    });
+
+    if (!configuredEmail || !configuredPassword) {
+      return false;
+    }
+
+    const existingAdmin = this.data.users.find(user =>
+      user.role === 'admin' && String(user.email || '').toLowerCase() === configuredEmail
+    );
+
+    const securePasswordHash = bcrypt.hashSync(configuredPassword, 10);
+
+    if (existingAdmin) {
+      const passwordMatches = typeof existingAdmin.password === 'string' && (
+        existingAdmin.password === configuredPassword ||
+        bcrypt.compareSync(configuredPassword, existingAdmin.password)
+      );
+      if (!passwordMatches) {
+        existingAdmin.password = securePasswordHash;
+        this.save();
+        this.syncToMongo('user', { email: existingAdmin.email }, existingAdmin);
+      }
+      return existingAdmin;
+    }
+
+    this.data.users.unshift({
+      id: 'usr-admin',
+      fullName: 'Atelier Owner',
+      email: configuredEmail,
+      password: securePasswordHash,
+      phone: (process.env.CONTACT_PHONE || '03241383370').replace(/[^0-9+]/g, ''),
+      role: 'admin',
+      createdAt: new Date().toISOString()
+    });
+    this.save();
+    this.syncToMongo('user', { email: configuredEmail }, this.data.users[0]);
+    return this.data.users[0];
   }
 
   async initMongo() {
@@ -602,7 +643,7 @@ class Database {
         await mongoose.connect(uri);
       }
       this.mongoConnected = true;
-      console.log('✓ FabOptic Database connected live to MongoDB Atlas Cloud Cluster!');
+      console.log('✓ OpticsKhan Database connected live to MongoDB Atlas Cloud Cluster!');
       await this.syncFromMongo();
     } catch (err) {
       console.warn('⚠️ MongoDB Atlas warning (using local fallback):', err.message);
@@ -622,6 +663,7 @@ class Database {
       if (users && users.length) this.data.users = users;
       if (orders && orders.length) this.data.orders = orders;
       if (consultations && consultations.length) this.data.consultations = consultations;
+      this.ensureAdminSeed();
       this.save(this.data);
     } catch (err) {
       console.warn('Could not sync from MongoDB Atlas:', err.message);
@@ -673,18 +715,8 @@ class Database {
     if (!data) {
       data = JSON.parse(JSON.stringify(initialSeed));
     }
-    if (!data.users || !data.users.length) {
-      data.users = [
-        {
-          id: "usr-admin",
-          fullName: "Atelier Owner",
-          email: "owner@faboptic.pk",
-          password: "admin",
-          phone: "03241383370",
-          role: "admin",
-          createdAt: new Date().toISOString()
-        }
-      ];
+    if (!data.users) data.users = [];
+    if (!data.users.length) {
       this.save(data);
     }
     return data;
@@ -832,7 +864,7 @@ class Database {
       rating: Math.min(5, Math.max(1, Number(reviewData.rating) || 5)),
       date: "Just now",
       comment: reviewData.comment || "",
-      productName: prod ? prod.name : "FabOptic Frame",
+      productName: prod ? prod.name : "OpticsKhan Frame",
       verifiedBuyer: true
     };
     if (!this.data.reviews) this.data.reviews = [];
@@ -926,7 +958,7 @@ class Database {
       this.data.subscribers.push({ email, phone, date: new Date().toISOString() });
       this.save();
     }
-    return { success: true, message: "Welcome to FabOptic VIP Club! Enjoy 10% off code FABOPTIC10." };
+    return { success: true, message: "Welcome to OpticsKhan VIP Club! Enjoy 10% off code OPTICSKHAN10." };
   }
 
   bookConsultation(payload) {
@@ -1024,7 +1056,7 @@ class Database {
         (typeof u.password === 'string' && u.password.startsWith('$2') && bcrypt.compareSync('admin', u.password))
       );
       if (usesDefault && process.env.NODE_ENV !== 'test') {
-        console.warn('⚠️  SECURITY: Owner account still uses the default password "admin". Set ADMIN_PASSWORD in .env.');
+        console.warn('⚠️  SECURITY: Owner account still uses the default password "admin". Set ADMIN_LOGIN_PASSWORD in .env.');
       }
       return false;
     }
@@ -1053,6 +1085,42 @@ class Database {
     if (!email || !this.data.orders) return [];
     const normalized = email.toLowerCase().trim();
     return this.data.orders.filter(o => o.customer && o.customer.email && o.customer.email.toLowerCase().trim() === normalized);
+  }
+
+  cancelOrderByCustomer(orderId, customerEmail, reason) {
+    const order = (this.data.orders || []).find(o => o.orderId === orderId);
+    if (!order) {
+      return { success: false, code: 'NOT_FOUND', message: 'Order not found.' };
+    }
+
+    const normalizedEmail = String(customerEmail || '').toLowerCase().trim();
+    const matchEmail = order.customer && order.customer.email && order.customer.email.toLowerCase().trim() === normalizedEmail;
+    if (!matchEmail) {
+      return { success: false, code: 'FORBIDDEN', message: 'You can only cancel your own orders.' };
+    }
+
+    const statusText = String(order.status || '').toLowerCase();
+    const isTerminal = statusText.includes('cancel') || statusText.includes('delivered') || statusText.includes('verified');
+    if (isTerminal) {
+      return { success: false, code: 'INVALID_STATE', message: 'This order cannot be cancelled anymore.' };
+    }
+
+    const trimmedReason = String(reason || '').trim();
+    if (!trimmedReason) {
+      return { success: false, code: 'REQUIRED', message: 'Please write a reason before cancelling this order.' };
+    }
+
+    order.status = 'Cancelled';
+    order.cancelReason = trimmedReason;
+    if (!order.statusHistory) order.statusHistory = [];
+    order.statusHistory.push({
+      status: 'Cancelled',
+      timestamp: new Date().toISOString(),
+      note: `Customer requested cancellation: ${trimmedReason}`
+    });
+    this.save();
+    this.syncToMongo('order', { orderId }, order);
+    return { success: true, message: 'Your order has been cancelled successfully.', data: order };
   }
 
   // --- OWNER / ADMIN PRODUCT MANAGEMENT (CRUD) ---
@@ -1147,14 +1215,31 @@ class Database {
   updateOrderStatus(orderId, status, courierData = {}) {
     const order = (this.data.orders || []).find(o => o.orderId === orderId);
     if (!order) return null;
-    order.status = status;
+
+    const normalizedStatus = String(status || '').trim();
+    if (!normalizedStatus) return null;
+
+    order.status = normalizedStatus;
     if (courierData.courierName) order.courierName = courierData.courierName;
     if (courierData.courierTrackingNumber !== undefined) order.courierTrackingNumber = courierData.courierTrackingNumber;
+
+    const isCancellation = normalizedStatus.toLowerCase().includes('cancel');
+    if (isCancellation) {
+      const cancelReason = String(courierData.reason || courierData.note || '').trim();
+      order.cancelReason = cancelReason || 'No reason provided';
+    }
+
     if (!order.statusHistory) order.statusHistory = [];
+    const note = courierData.note || courierData.reason || (
+      isCancellation
+        ? `Order cancelled: ${order.cancelReason || 'No reason provided'}`
+        : `Status updated to ${normalizedStatus}`
+    );
+
     order.statusHistory.push({
-      status,
+      status: normalizedStatus,
       timestamp: new Date().toISOString(),
-      note: courierData.note || `Status updated to ${status}`
+      note
     });
     this.save();
     this.syncToMongo('order', { orderId }, order);

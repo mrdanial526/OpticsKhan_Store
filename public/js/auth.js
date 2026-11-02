@@ -7,8 +7,14 @@ Object.assign(App, {
   // ==========================================
   loadCurrentUser() {
     try {
-      const saved = localStorage.getItem('faboptic_user');
-      this.currentUser = saved ? JSON.parse(saved) : null;
+      const saved = localStorage.getItem('opticskhan_user') || localStorage.getItem('opticskhan_auth_user');
+      const user = saved ? JSON.parse(saved) : null;
+      this.currentUser = user;
+
+      if (user) {
+        localStorage.setItem('opticskhan_user', JSON.stringify(user));
+        localStorage.setItem('opticskhan_auth_user', JSON.stringify(user));
+      }
     } catch(e) {
       this.currentUser = null;
     }
@@ -83,10 +89,6 @@ Object.assign(App, {
       document.getElementById(id)?.classList.remove('input-error');
     });
 
-    if (defaultRole === 'admin') {
-      this.fillOwnerDemoCredentials();
-    }
-
     const banner = document.getElementById('auth-logged-in-banner');
     const userText = document.getElementById('auth-logged-in-user-text');
     if (banner && userText) {
@@ -126,7 +128,7 @@ Object.assign(App, {
       if (regForm) regForm.style.display = 'none';
       if (tabLogin) tabLogin.classList.add('active');
       if (tabReg) tabReg.classList.remove('active');
-      if (title) title.textContent = 'Sign In to FabOptic';
+      if (title) title.textContent = 'Sign In to OpticsKhan';
       if (regErrorBox) regErrorBox.style.display = 'none';
     } else {
       if (loginForm) loginForm.style.display = 'none';
@@ -152,20 +154,46 @@ Object.assign(App, {
     }
   },
 
-  fillOwnerDemoCredentials() {
-    const emailEl = document.getElementById('login-email');
-    const passEl = document.getElementById('login-password');
-    if (emailEl) {
-      emailEl.value = 'owner@faboptic.pk';
-      emailEl.classList.remove('input-error');
+  handleGoogleAuth(mode = 'login') {
+    if (!window.google || !window.google.accounts) {
+      Cart.showToast('❌ Google sign-in is not configured yet.');
+      return;
     }
-    if (passEl) {
-      passEl.value = 'admin';
-      passEl.classList.remove('input-error');
-    }
-    const loginErr = document.getElementById('login-error-box');
-    if (loginErr) loginErr.style.display = 'none';
-    Cart.showToast('👑 Owner credentials auto-filled! Click "Sign In" to enter Owner Suite.');
+
+    const label = mode === 'register' ? 'Sign up' : 'Login';
+    const client = window.google.accounts.id;
+
+    client.initialize({
+      client_id: window.GOOGLE_CLIENT_ID,
+      callback: async (response) => {
+        try {
+          const res = await fetch('/api/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: response.credential })
+          });
+
+          const data = await res.json();
+
+          if (!data.success) {
+            Cart.showToast(`❌ ${data.message || 'Google authentication failed.'}`);
+            return;
+          }
+
+          this.currentUser = data.user;
+          localStorage.setItem('opticskhan_user', JSON.stringify(data.user));
+          localStorage.setItem('opticskhan_auth_user', JSON.stringify(data.user));
+          localStorage.setItem('opticskhan_token', data.token);
+          this.updateAuthUI();
+          this.closeAuthModal();
+          Cart.showToast(`✅ Welcome ${data.user.fullName}!`);
+        } catch (error) {
+          Cart.showToast(`❌ ${label} with Google failed. Please try again.`);
+        }
+      }
+    });
+
+    client.prompt();
   },
 
   async handleLogin(e) {
@@ -196,9 +224,10 @@ Object.assign(App, {
       if (data.success && data.user) {
         this.currentUser = data.user;
         if (data.token) {
-          localStorage.setItem('faboptic_token', data.token);
+          localStorage.setItem('opticskhan_token', data.token);
         }
-        localStorage.setItem('faboptic_user', JSON.stringify(data.user));
+        localStorage.setItem('opticskhan_user', JSON.stringify(data.user));
+        localStorage.setItem('opticskhan_auth_user', JSON.stringify(data.user));
         this.updateAuthUI();
         this.closeAuthModal();
 
@@ -342,8 +371,9 @@ Object.assign(App, {
 
   logoutUser() {
     this.currentUser = null;
-    localStorage.removeItem('faboptic_user');
-    localStorage.removeItem('faboptic_token');
+    localStorage.removeItem('opticskhan_user');
+    localStorage.removeItem('opticskhan_auth_user');
+    localStorage.removeItem('opticskhan_token');
     this.updateAuthUI();
     this.closeCustomerModal();
     this.closeAdminModal();
@@ -395,6 +425,9 @@ Object.assign(App, {
               <div style="display:flex; align-items:center; gap:8px;">
                 <span style="background:#f0fdf4; color:#166534; font-size:11px; font-weight:700; padding:3px 8px; border-radius:99px;">${o.status}</span>
                 <button class="action-btn-mini" onclick="App.closeCustomerModal(); App.openTrackingModal('${o.orderId}')">Track</button>
+                ${!((o.status || '').toLowerCase().includes('cancel') || (o.status || '').toLowerCase().includes('delivered') || (o.status || '').toLowerCase().includes('verified')) ? `
+                  <button class="action-btn-mini danger" onclick="App.cancelCustomerOrder('${o.orderId}')">Cancel</button>
+                ` : ''}
               </div>
             </div>
           `).join('');
@@ -406,6 +439,46 @@ Object.assign(App, {
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+  },
+
+  async cancelCustomerOrder(orderId) {
+    if (!this.currentUser) {
+      this.openAuthModal();
+      return;
+    }
+
+    const reason = await this.showPromptDialog({
+      title: 'Cancel order',
+      message: `Write the cancellation reason for order #${orderId}:`,
+      placeholder: 'Type a cancellation reason',
+      allowEmpty: false,
+    });
+    if (reason === null) return;
+
+    const trimmedReason = String(reason).trim();
+    if (!trimmedReason) {
+      Cart.showToast('⚠️ Please write a reason before cancelling this order.');
+      return;
+    }
+
+    try {
+      const res = await this.authFetch(`/api/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: trimmedReason })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        Cart.showToast(data.message || 'Order cancelled successfully.');
+        await this.openCustomerModal();
+        return;
+      }
+
+      alert(data.message || 'Unable to cancel this order.');
+    } catch (e) {
+      alert('Error cancelling this order.');
+    }
   },
 
   closeCustomerModal() {

@@ -11,6 +11,6 @@
     <circle cx="32" cy="14" r="2" fill="#D4AF37"/>
   </g>
   <!-- Wordmark -->
-  <text x="74" y="27" font-family="'Integral CF', 'Montserrat', 'Inter', sans-serif" font-weight="900" font-size="22" letter-spacing="1" fill="#000">FAB<tspan fill="#D4AF37">OPTIC</tspan></text>
+  <text x="74" y="27" font-family="'Integral CF', 'Montserrat', 'Inter', sans-serif" font-weight="900" font-size="20" letter-spacing="1" fill="#000">OPTICS<tspan fill="#D4AF37">KHAN</tspan></text>
   <text x="75" y="39" font-family="'Inter', sans-serif" font-weight="600" font-size="8" letter-spacing="3" fill="#666">HAUTE OPTICAL ATELIER</text>
 </svg>

@@ -2,9 +2,14 @@
 // Extends the global App object (defined in app-core.js).
 Object.assign(App, {
 
+  getWishlistKey() {
+    return this.getStorageKey ? this.getStorageKey('opticskhan_wishlist') : 'opticskhan_wishlist';
+  },
+
   loadWishlist() {
     try {
-      const saved = localStorage.getItem('faboptic_wishlist');
+      const key = this.getWishlistKey();
+      const saved = localStorage.getItem(key) || (key.endsWith('_guest') ? localStorage.getItem('opticskhan_wishlist') : null);
       this.wishlist = saved ? JSON.parse(saved) : [];
       this.updateWishlistBadge();
     } catch (e) {
@@ -13,7 +18,7 @@ Object.assign(App, {
   },
 
   saveWishlist() {
-    localStorage.setItem('faboptic_wishlist', JSON.stringify(this.wishlist));
+    localStorage.setItem(this.getWishlistKey(), JSON.stringify(this.wishlist));
     this.updateWishlistBadge();
   },
 

@@ -11,27 +11,47 @@ const Cart = {
     this.render();
   },
 
+  getCartKey() {
+    const scope = (window.App && window.App.getUserScope) ? window.App.getUserScope() : 'guest';
+    return `opticskhan_cart_${scope}`;
+  },
+
+  getCouponKey() {
+    const scope = (window.App && window.App.getUserScope) ? window.App.getUserScope() : 'guest';
+    return `opticskhan_coupon_${scope}`;
+  },
+
+  getLastOrderKey() {
+    const scope = (window.App && window.App.getUserScope) ? window.App.getUserScope() : 'guest';
+    return `opticskhan_last_order_${scope}`;
+  },
+
   load() {
     try {
-      const saved = localStorage.getItem('faboptic_cart');
+      this.items = [];
+      this.coupon = null;
+      const key = this.getCartKey();
+      const saved = localStorage.getItem(key) || (key.endsWith('_guest') ? localStorage.getItem('opticskhan_cart') : null);
       if (saved) {
         this.items = JSON.parse(saved);
       }
-      const savedCoupon = localStorage.getItem('faboptic_coupon');
+      const couponKey = this.getCouponKey();
+      const savedCoupon = localStorage.getItem(couponKey) || (couponKey.endsWith('_guest') ? localStorage.getItem('opticskhan_coupon') : null);
       if (savedCoupon) {
         this.coupon = JSON.parse(savedCoupon);
       }
     } catch (e) {
       this.items = [];
+      this.coupon = null;
     }
   },
 
   save() {
-    localStorage.setItem('faboptic_cart', JSON.stringify(this.items));
+    localStorage.setItem(this.getCartKey(), JSON.stringify(this.items));
     if (this.coupon) {
-      localStorage.setItem('faboptic_coupon', JSON.stringify(this.coupon));
+      localStorage.setItem(this.getCouponKey(), JSON.stringify(this.coupon));
     } else {
-      localStorage.removeItem('faboptic_coupon');
+      localStorage.removeItem(this.getCouponKey());
     }
   },
 
@@ -128,7 +148,7 @@ const Cart = {
         alert(data.message || "Invalid coupon code");
       }
     } catch (err) {
-      alert("Failed to apply coupon. Try FABOPTIC10");
+      alert("Failed to apply coupon. Try OPTICSKHAN10");
     }
   },
 
@@ -306,21 +326,26 @@ const Cart = {
     const modal = document.getElementById('checkout-modal');
     if (!modal) return;
 
-    // 2. Pre-fill customer details from verified session
+    // 2. Pre-fill customer details from verified session (isolated per user)
     const form = document.getElementById('checkout-order-form');
-    if (form && window.App.currentUser) {
-      const u = window.App.currentUser;
-      if (form.fullName && u.fullName) form.fullName.value = u.fullName;
-      if (form.phone && u.phone) form.phone.value = u.phone;
-      if (form.email && u.email) form.email.value = u.email;
-      if (form.address && u.address) form.address.value = u.address;
-      if (form.city && u.city) form.city.value = u.city;
+    const userBar = document.getElementById('checkout-auth-user-bar');
+    const userDisplayName = document.getElementById('checkout-user-display-name');
 
-      const userBar = document.getElementById('checkout-auth-user-bar');
-      const userDisplayName = document.getElementById('checkout-user-display-name');
-      if (userBar && userDisplayName) {
-        userBar.style.display = 'flex';
-        userDisplayName.textContent = `${u.fullName} (${u.email || u.phone})`;
+    if (form) {
+      if (window.App && window.App.currentUser) {
+        const u = window.App.currentUser;
+        form.fullName.value = u.fullName || '';
+        form.phone.value = u.phone || '';
+        form.email.value = u.email || '';
+        form.address.value = u.address || '';
+        if (u.city) form.city.value = u.city;
+        if (userBar && userDisplayName) {
+          userBar.style.display = 'flex';
+          userDisplayName.textContent = `${u.fullName} (${u.email || u.phone})`;
+        }
+      } else {
+        form.reset();
+        if (userBar) userBar.style.display = 'none';
       }
     }
 
@@ -352,41 +377,20 @@ const Cart = {
     if (summaryEl) {
       summaryEl.textContent = `Rs. ${total.toLocaleString()}`;
     }
-    const walletAmt = document.getElementById('wallet-transfer-amount');
-    if (walletAmt) {
-      walletAmt.textContent = `Rs. ${total.toLocaleString()}`;
-    }
-
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
   },
 
   onPaymentMethodChange(val) {
-    const walletBox = document.getElementById('wallet-payment-box');
     const submitBtn = document.getElementById('checkout-submit-btn');
-    const walletTitle = document.getElementById('wallet-title');
-    const walletTypeDisplay = document.getElementById('wallet-type-display');
-    const total = this.getTotal().toLocaleString();
 
     if (val && !val.includes('Cash on Delivery')) {
-      if (walletBox) walletBox.style.display = 'block';
-      const isJazz = val.includes('JazzCash');
-      const isBank = val.includes('Bank');
-      if (walletTitle) {
-        walletTitle.textContent = isBank ? 'Direct Bank Transfer Instructions' : (isJazz ? 'JazzCash Transfer Instructions' : 'EasyPaisa Transfer Instructions');
-      }
-      if (walletTypeDisplay) {
-        walletTypeDisplay.textContent = isBank ? 'Meezan Bank / Bank Alfalah' : (isJazz ? 'JazzCash Mobile Account' : 'EasyPaisa Mobile Account');
-      }
-      const amtEl = document.getElementById('wallet-transfer-amount');
-      if (amtEl) amtEl.textContent = `Rs. ${total}`;
-      if (submitBtn) {
-        submitBtn.textContent = `Confirm Order (${isBank ? 'Direct Bank Transfer' : (isJazz ? 'Paid via JazzCash' : 'Paid via EasyPaisa')})`;
-      }
-    } else {
-      if (walletBox) walletBox.style.display = 'none';
       if (submitBtn) submitBtn.textContent = 'Confirm Order (Cash on Delivery)';
+      this.showToast('Only Cash on Delivery is available for checkout.');
+      return;
     }
+
+    if (submitBtn) submitBtn.textContent = 'Confirm Order (Cash on Delivery)';
   },
 
   closeCheckoutModal() {
@@ -416,8 +420,8 @@ const Cart = {
     const tidInput = form.querySelector('[name="transactionId"]');
     const transactionId = tidInput ? tidInput.value.trim() : '';
 
-    if (!paymentMethod.includes('Cash on Delivery') && !transactionId) {
-      alert('Please enter your JazzCash/EasyPaisa Transaction ID (TID) or sender account reference number so we can verify your payment.');
+    if (!paymentMethod.includes('Cash on Delivery')) {
+      alert('Only Cash on Delivery is available for checkout.');
       if (tidInput) tidInput.focus();
       return;
     }
@@ -429,7 +433,7 @@ const Cart = {
       userId: window.App?.currentUser?.id || null,
       fullName: form.fullName.value || window.App.currentUser.fullName,
       phone: form.phone.value || window.App.currentUser.phone,
-      email: form.email.value || window.App.currentUser.email || 'customer@faboptic.pk',
+      email: form.email.value || window.App.currentUser.email || 'customer@opticskhan.pk',
       address: form.address.value,
       city: form.city.value,
       paymentMethod,
@@ -452,17 +456,20 @@ const Cart = {
       });
       const data = await res.json();
       if (data.success) {
-        // Save recent order ID for tracking
-        localStorage.setItem('faboptic_last_order_id', data.data.orderId);
+        // Save recent order ID for tracking (isolated per user scope)
+        localStorage.setItem(this.getLastOrderKey(), data.data.orderId);
+        localStorage.setItem('opticskhan_last_order_id', data.data.orderId);
 
         // Update local session with saved address
         if (data.updatedUser && window.App) {
           window.App.currentUser = { ...window.App.currentUser, ...data.updatedUser };
-          localStorage.setItem('faboptic_auth_user', JSON.stringify(window.App.currentUser));
+          localStorage.setItem('opticskhan_user', JSON.stringify(window.App.currentUser));
+          localStorage.setItem('opticskhan_auth_user', JSON.stringify(window.App.currentUser));
         } else if (window.App && window.App.currentUser) {
           window.App.currentUser.address = orderData.address;
           window.App.currentUser.city = orderData.city;
-          localStorage.setItem('faboptic_auth_user', JSON.stringify(window.App.currentUser));
+          localStorage.setItem('opticskhan_user', JSON.stringify(window.App.currentUser));
+          localStorage.setItem('opticskhan_auth_user', JSON.stringify(window.App.currentUser));
         }
 
         // Clear cart
@@ -499,8 +506,7 @@ const Cart = {
 
     const tidRow = document.getElementById('confirmed-tid-row');
     const tidVal = document.getElementById('confirmed-tid-value');
-    const walletNotice = document.getElementById('confirmed-wallet-notice');
-    const isWallet = order.paymentMethod && !order.paymentMethod.includes('Cash on Delivery');
+    const isWallet = false;
 
     if (order.transactionId && tidRow && tidVal) {
       tidRow.style.display = 'block';
@@ -509,13 +515,9 @@ const Cart = {
       tidRow.style.display = 'none';
     }
 
-    if (walletNotice) {
-      walletNotice.style.display = isWallet ? 'block' : 'none';
-    }
-
     const emailNotice = document.getElementById('confirmed-email-notice');
     if (emailNotice) {
-      emailNotice.textContent = order.customer.email || 'customer@faboptic.pk';
+      emailNotice.textContent = order.customer.email || 'customer@opticskhan.pk';
     }
 
     // WhatsApp link with full itemized receipt for instant dispatch confirmation
@@ -523,7 +525,7 @@ const Cart = {
     if (waBtn) {
       const itemsList = (order.items || []).map(i => `• ${i.name} (x${i.quantity || 1}) - Rs. ${(i.price || 0).toLocaleString()}`).join('\n');
       const text = encodeURIComponent(
-        `👓 *${isWallet ? 'NEW ORDER - ADVANCE PAYMENT PROOF' : 'NEW ORDER CONFIRMATION'} - FABOPTIC PAKISTAN*\n\n` +
+        `👓 *${isWallet ? 'NEW ORDER - ADVANCE PAYMENT PROOF' : 'NEW ORDER CONFIRMATION'} - OPTICSKHAN PAKISTAN*\n\n` +
         `*Order ID:* #${order.orderId}\n` +
         `*Customer:* ${order.customer.fullName}\n` +
         `*Contact:* ${order.customer.phone}\n` +

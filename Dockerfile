@@ -1,4 +1,4 @@
-# ─── FabOptic Store — Production Dockerfile ───
+# ─── OpticsKhan Store — Production Dockerfile ───
 FROM node:20-alpine AS base
 
 WORKDIR /app

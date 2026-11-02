@@ -245,7 +245,8 @@ Object.assign(App, {
     if (resultBox) resultBox.style.display = 'none';
     if (errorBox) errorBox.style.display = 'none';
 
-    const targetId = orderId || localStorage.getItem('faboptic_last_order_id') || '';
+    const scopeKey = window.Cart && window.Cart.getLastOrderKey ? window.Cart.getLastOrderKey() : 'opticskhan_last_order_id';
+    const targetId = orderId || (this.currentUser ? localStorage.getItem(scopeKey) : '') || '';
     if (input) {
       input.value = targetId;
       if (targetId) {
@@ -278,7 +279,8 @@ Object.assign(App, {
     }
 
     try {
-      const res = await fetch(`/api/orders/${query}`);
+      const headers = this.authHeaders ? this.authHeaders() : {};
+      const res = await fetch(`/api/orders/${query}`, { headers });
       const data = await res.json();
 
       if (data.success && data.data) {
@@ -351,6 +353,18 @@ Object.assign(App, {
           </div>
         ` : '';
 
+        const canCancelCustomerOrder = this.currentUser && order.customer && order.customer.email && this.currentUser.email &&
+          this.currentUser.email.toLowerCase() === String(order.customer.email).toLowerCase() &&
+          !(order.status || '').toLowerCase().includes('cancel') &&
+          !(order.status || '').toLowerCase().includes('delivered') &&
+          !(order.status || '').toLowerCase().includes('verified');
+
+        const customerCancelHtml = canCancelCustomerOrder ? `
+          <button class="secondary-btn" onclick="App.cancelCustomerOrder('${order.orderId}')" style="width:100%; text-align:center; padding:9px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-weight:800; font-size:12px; margin-top:4px;">
+            ❌ Cancel My Order
+          </button>
+        ` : '';
+
         resultBox.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-gray-200); padding-bottom:10px;">
             <div>
@@ -394,11 +408,13 @@ Object.assign(App, {
             </div>
           </div>
 
+          ${customerCancelHtml}
+
           <button class="secondary-btn" onclick="App.printOrderInvoice('${order.orderId}')" style="width:100%; text-align:center; padding:9px; background:#f8fafc; border:1px solid #cbd5e1; font-weight:700; font-size:12px; margin-top:4px;">
             🖨️ Print Packing Slip / Invoice
           </button>
 
-          <a href="https://wa.me/923241383370?text=Hi%20FabOptic!%20Checking%20dispatch%20for%20Order%20%23${order.orderId}" target="_blank" class="primary-btn" style="text-align:center; padding:10px; background:#25D366; color:#fff; font-size:13px;">
+          <a href="https://wa.me/923241383370?text=Hi%20OpticsKhan!%20Checking%20dispatch%20for%20Order%20%23${order.orderId}" target="_blank" class="primary-btn" style="text-align:center; padding:10px; background:#25D366; color:#fff; font-size:13px;">
             💬 WhatsApp Dispatch Desk for Updates
           </a>
         `;

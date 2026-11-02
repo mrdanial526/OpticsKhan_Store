@@ -543,6 +543,7 @@ Object.assign(App, {
         const rxItem = (o.items || []).find(it => it.prescription && it.prescription.prescriptionImage);
         const hasRxImg = !!rxItem;
         const rxImgUrl = rxItem ? rxItem.prescription.prescriptionImage : '';
+        const isCancellable = !((o.status || '').toLowerCase().includes('cancel') || (o.status || '').toLowerCase().includes('delivered') || (o.status || '').toLowerCase().includes('verified'));
 
         return `
         <tr>
@@ -568,9 +569,15 @@ Object.assign(App, {
             ` : ''}
           </td>
           <td>
-            <span style="background:#f0fdf4; color:#166534; font-size:11px; font-weight:800; padding:3px 8px; border-radius:99px;">
+            <span style="background:${o.status && o.status.toLowerCase().includes('cancel') ? '#fee2e2' : '#f0fdf4'}; color:${o.status && o.status.toLowerCase().includes('cancel') ? '#991b1b' : '#166534'}; font-size:11px; font-weight:800; padding:3px 8px; border-radius:99px; display:inline-block;">
               ${o.status}
             </span>
+            ${o.cancelReason ? `<div style="font-size:10px; color:#991b1b; margin-top:4px; line-height:1.4;">Reason: ${o.cancelReason}</div>` : ''}
+            ${isCancellable ? `
+              <button class="action-btn-mini danger" onclick="App.handleCancelOrderFromAdmin('${o.orderId}')" style="font-size:10.5px; padding:3px 8px; font-weight:700; margin-top:6px; width:100%;" title="Cancel this order with a reason">
+                ❌ Cancel
+              </button>
+            ` : ''}
           </td>
           <td>
             <select class="form-input" style="padding:4px 8px; font-size:11.5px; width:100%;" onchange="App.handleUpdateOrderStatus('${o.orderId}', this.value)">
@@ -579,6 +586,7 @@ Object.assign(App, {
               <option value="16-pt QC Inspection Passed" ${o.status === '16-pt QC Inspection Passed' ? 'selected' : ''}>16-pt QC Inspection Passed</option>
               <option value="Dispatched with Courier TCS" ${o.status === 'Dispatched with Courier TCS' ? 'selected' : ''}>Dispatched with Courier TCS</option>
               <option value="Delivered & Verified" ${o.status === 'Delivered & Verified' ? 'selected' : ''}>Delivered & Verified</option>
+              <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
             <div style="display:flex; gap:4px; margin-top:6px;">
               <button class="action-btn-mini" onclick="App.printOrderInvoice('${o.orderId}')" style="font-size:10.5px; padding:3px 8px; font-weight:700; background:#f1f5f9; border:1px solid #cbd5e1; flex:1;" title="Print Packing Slip & Invoice">
@@ -597,28 +605,87 @@ Object.assign(App, {
     } catch(e) {}
   },
 
+  async handleCancelOrderFromAdmin(orderId) {
+    const inputReason = await this.showPromptDialog({
+      title: 'Cancel order',
+      message: `Write the cancellation reason for order #${orderId}:`,
+      placeholder: 'Type a cancellation reason',
+      allowEmpty: false,
+    });
+    if (inputReason === null) return;
+
+    const reason = String(inputReason).trim();
+    if (!reason) {
+      Cart.showToast('⚠️ Please write a reason before cancelling this order.');
+      return;
+    }
+
+    try {
+      const res = await this.authFetch(`/api/admin/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Cancelled', reason })
+      });
+      const data = await res.json();
+      if (data.success) {
+        Cart.showToast(`Order #${orderId} was cancelled.`);
+        await this.refreshAdminOrders();
+      } else {
+        alert(data.message || 'Unable to cancel this order.');
+      }
+    } catch (e) {
+      alert('Error cancelling this order.');
+    }
+  },
+
   async handleUpdateOrderStatus(orderId, status) {
     try {
       let courierTrackingNumber = undefined;
       let courierName = undefined;
+      let reason = '';
 
       if (status.includes('Dispatched') || status.includes('Courier')) {
-        const inputTrack = prompt(`Enter Courier Tracking Number (e.g. TCS-99881122 or Trax ID) for order #${orderId} (leave empty to skip):`, '');
-        if (inputTrack !== null && inputTrack.trim()) {
-          courierTrackingNumber = inputTrack.trim();
-          courierName = "TCS Express";
+        const inputTrack = await this.showPromptDialog({
+          title: 'Dispatch update',
+          message: `Enter Courier Tracking Number (e.g. TCS-99881122 or Trax ID) for order #${orderId} (leave empty to skip):`,
+          placeholder: 'TCS-99881122 or Trax ID',
+          allowEmpty: true,
+        });
+        if (inputTrack === null) return;
+
+        const trackingValue = String(inputTrack).trim();
+        if (trackingValue) {
+          courierTrackingNumber = trackingValue;
+          courierName = 'TCS Express';
+        }
+      }
+
+      if (status.toLowerCase().includes('cancel')) {
+        const inputReason = await this.showPromptDialog({
+          title: 'Cancel order',
+          message: `Write the cancellation reason for order #${orderId}:`,
+          placeholder: 'Type a cancellation reason',
+          allowEmpty: false,
+        });
+        if (inputReason === null) return;
+        reason = String(inputReason).trim();
+        if (!reason) {
+          Cart.showToast('⚠️ You must write a reason before cancelling this order.');
+          return;
         }
       }
 
       const res = await this.authFetch(`/api/admin/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, courierName, courierTrackingNumber })
+        body: JSON.stringify({ status, courierName, courierTrackingNumber, reason })
       });
       const data = await res.json();
       if (data.success) {
         Cart.showToast(`Order #${orderId} updated to: ${status}`);
         await this.refreshAdminOrders();
+      } else {
+        alert(data.message || 'Unable to update this order.');
       }
     } catch(e) {
       alert('Error updating order fulfillment status.');
@@ -653,7 +720,7 @@ Object.assign(App, {
       invoiceEl.innerHTML = `
         <div style="border-bottom:2px solid #0f172a; padding-bottom:14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
-            <div style="font-family:var(--font-display, serif); font-size:22px; font-weight:900; letter-spacing:0.5px; color:#0f172a;">FABOPTIC CO.</div>
+            <div style="font-family:var(--font-display, serif); font-size:22px; font-weight:900; letter-spacing:0.5px; color:#0f172a;">OPTICSKHAN</div>
             <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#475569; font-weight:700;">Luxury Eyewear Atelier & Precision Optical Lab</div>
             <div style="font-size:11px; color:#64748b; margin-top:2px;">Lahore, Pakistan • WhatsApp: +92 324 1383370 • rdanial795@gmail.com</div>
           </div>
@@ -753,7 +820,7 @@ Object.assign(App, {
 
         <!-- Optical Guarantee Disclaimer -->
         <div style="background:#f8fafc; border-top:1px dashed #cbd5e1; padding:12px 14px; border-radius:6px; font-size:10.5px; color:#64748b; line-height:1.4;">
-          <strong>FabOptic 7-Day Optical Guarantee:</strong> If lenses need power calibration or fit adjustment, exchange within 7 days. Inspect flyer seal upon delivery. For queries, WhatsApp 0324-1383370 or email rdanial795@gmail.com.
+          <strong>OpticsKhan 7-Day Optical Guarantee:</strong> If lenses need power calibration or fit adjustment, exchange within 7 days. Inspect flyer seal upon delivery. For queries, WhatsApp 0324-1383370 or email rdanial795@gmail.com.
         </div>
       `;
 
@@ -830,7 +897,7 @@ Object.assign(App, {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `FabOptic_Courier_Manifest_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `OpticsKhan_Courier_Manifest_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

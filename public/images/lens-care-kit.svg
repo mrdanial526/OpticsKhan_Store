@@ -5,7 +5,7 @@
     <rect x="120" y="160" width="230" height="120" rx="20" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
     <path d="M120 200 C200 215 270 215 350 200" stroke="#27272a" stroke-width="3"/>
     <circle cx="235" cy="205" r="7" fill="#D4AF37"/>
-    <text x="235" y="250" text-anchor="middle" font-family="'Syne', sans-serif" font-size="12" font-weight="800" fill="#D4AF37" letter-spacing="1">FABOPTIC ATELIER</text>
+    <text x="235" y="250" text-anchor="middle" font-family="'Syne', sans-serif" font-size="12" font-weight="800" fill="#D4AF37" letter-spacing="1">OPTICSKHAN</text>
 
     <!-- Anti-Fog Spray Bottle -->
     <rect x="390" y="140" width="60" height="130" rx="10" fill="#0284c7"/>

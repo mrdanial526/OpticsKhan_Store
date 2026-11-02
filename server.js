@@ -5,6 +5,7 @@ const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const { OAuth2Client } = require('google-auth-library');
 const { body, validationResult } = require('express-validator');
 const db = require('./db/database');
 const { createToken, attachUser, requireAuth, requireAdmin } = require('./lib/auth');
@@ -13,6 +14,7 @@ const { sendOrderNotifications } = require('./lib/notifications');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_TEST = process.env.NODE_ENV === 'test';
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Behind Docker / Nginx / Render / Railway the real client IP comes from X-Forwarded-For
 if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
@@ -24,12 +26,12 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://accounts.google.com', 'https://*.google.com', 'https://*.googleusercontent.com'],
         scriptSrcAttr: ["'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://accounts.google.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", 'https://accounts.google.com', 'https://*.google.com'],
         mediaSrc: ["'self'", 'data:'],
         objectSrc: ["'none'"],
         frameAncestors: ["'self'"],
@@ -187,6 +189,9 @@ app.post(
     body('address').trim().notEmpty().withMessage('Address required'),
     body('items').isArray({ min: 1 }).withMessage('At least one item required'),
     body('totalAmount').isFloat({ gt: 0 }).withMessage('Total amount must be positive'),
+    body('paymentMethod').trim().notEmpty().withMessage('Payment method required').custom((value) => {
+      return typeof value === 'string' && value.toLowerCase().includes('cash on delivery');
+    }).withMessage('Only Cash on Delivery is available for checkout.'),
     body('email').optional({ values: 'falsy' }).isEmail().withMessage('Invalid email address')
   ],
   validate,
@@ -317,6 +322,50 @@ app.post(
   }
 );
 
+app.post('/api/auth/google', authLimiter, async (req, res) => {
+  const { credential } = req.body || {};
+  if (!credential) {
+    return res.status(400).json({ success: false, message: 'Google credential missing.' });
+  }
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload?.email?.toLowerCase().trim();
+    const fullName = payload?.name || 'Google User';
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Google email not found.' });
+    }
+
+    let user = (db.data.users || []).find(u => u.email && u.email.toLowerCase() === email);
+    if (!user) {
+      const created = db.registerUser({
+        fullName,
+        email,
+        password: `google-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        phone: ''
+      });
+
+      if (!created.success) {
+        return res.status(400).json(created);
+      }
+
+      user = created.user;
+    }
+
+    const token = createToken(user);
+    return res.json({ success: true, user, token });
+  } catch (error) {
+    console.error('Google auth failed:', error.message || error);
+    return res.status(401).json({ success: false, message: 'Google authentication failed.' });
+  }
+});
+
 // Current session (lets the frontend confirm a stored token is still valid)
 app.get('/api/auth/me', requireAuth, (req, res) => {
   const user = db.getUserById(req.user.uid);
@@ -328,6 +377,18 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
 app.get('/api/auth/my-orders', requireAuth, (req, res) => {
   const orders = db.getUserOrders(req.user.email);
   res.json({ success: true, total: orders.length, data: orders });
+});
+
+app.patch('/api/orders/:orderId/cancel', requireAuth, (req, res) => {
+  const reason = req.body && req.body.reason;
+  const result = db.cancelOrderByCustomer(req.params.orderId, req.user.email, reason);
+
+  if (!result.success) {
+    const statusCode = result.code === 'NOT_FOUND' ? 404 : result.code === 'FORBIDDEN' ? 403 : result.code === 'INVALID_STATE' ? 409 : 400;
+    return res.status(statusCode).json({ success: false, message: result.message });
+  }
+
+  res.json({ success: true, message: result.message, data: result.data });
 });
 
 // --- OWNER / MANAGEMENT PRODUCT MANAGEMENT (CRUD) ---
@@ -378,12 +439,22 @@ app.get('/api/admin/orders', (req, res) => {
 });
 
 app.patch('/api/admin/orders/:orderId', (req, res) => {
-  const { status, courierName, courierTrackingNumber } = req.body;
-  const order = db.updateOrderStatus(req.params.orderId, status, { courierName, courierTrackingNumber });
+  const { status, courierName, courierTrackingNumber, reason, note } = req.body;
+
+  if (!status || typeof status !== 'string' || !status.trim()) {
+    return res.status(400).json({ success: false, message: 'Order status is required.' });
+  }
+
+  const isCancellation = status.toLowerCase().includes('cancel');
+  if (isCancellation && (!reason || !String(reason).trim())) {
+    return res.status(400).json({ success: false, message: 'Please write a reason before cancelling this order.' });
+  }
+
+  const order = db.updateOrderStatus(req.params.orderId, status, { courierName, courierTrackingNumber, reason, note });
   if (!order) {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
-  res.json({ success: true, message: "Order status updated", data: order });
+  res.json({ success: true, message: isCancellation ? 'Order cancelled successfully' : 'Order status updated', data: order });
 });
 
 // --- REVIEWS & RATINGS ---
@@ -463,13 +534,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Owner password: set ADMIN_PASSWORD in .env to replace the default demo password
-db.applyOwnerPassword(process.env.ADMIN_PASSWORD);
+// Owner password: set ADMIN_LOGIN_PASSWORD (or legacy ADMIN_PASSWORD) in .env before starting the app.
+db.applyOwnerPassword(process.env.ADMIN_LOGIN_PASSWORD || process.env.ADMIN_PASSWORD);
 
 if (require.main === module) {
   const server = app.listen(PORT, () => {
     console.log(`===============================================`);
-    console.log(`👓 FabOptic Store Server Running at: http://localhost:${PORT}`);
+    console.log(`👓 OpticsKhan Store Server Running at: http://localhost:${PORT}`);
     console.log(`🚀 REST API & Real-time Sales Alerts active`);
     console.log(`===============================================`);
   });
